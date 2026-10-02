@@ -557,7 +557,7 @@
     <div class="field-group"><label class="field-label">Preferred model</label><select class="input-field" id="modelSelect"><option value="">Auto (router decides)</option></select></div>
     <div class="field-row">
       <div class="field-group"><label class="field-label">Temperature</label><input type="number" class="input-field" id="tempInput" min="0" max="2" step="0.1" value="0.2"></div>
-      <div class="field-group"><label class="field-label">Max tokens</label><input type="number" class="input-field" id="maxTokensInput" min="256" max="32000" step="256" value="4096"></div>
+      <div class="field-group"><label class="field-label">Max tokens</label><input type="number" class="input-field" id="maxTokensInput" min="256" max="32000" step="256" value="8192"></div>
     </div>
   </div>
   <div class="modal-actions"><button class="btn" onclick="closeSettings()">Cancel</button><button class="btn-primary" onclick="saveSettings()">Save</button></div>
@@ -679,7 +679,6 @@ if (window.pdfjsLib) {
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 }
 
-// ── FIXED: THINKING_SYSTEM_PROMPT was undefined in the previous version ──
 const THINKING_SYSTEM_PROMPT = `When thinking through this problem, wrap your internal reasoning in <thinking>...</thinking> tags. 
 Your final answer should come AFTER the closing </thinking> tag. 
 Do not repeat your reasoning in the final answer.`;
@@ -698,9 +697,7 @@ Rules:
 
 const PROXY_URL = "https://nobody-ai-proxy.shafick074.workers.dev";
 
-// ── UPDATED: Best verified models as of Oct 2026 ──
-// DeepSeek: deepseek-flash (V4.1 Flash) is the canonical GA model, outperforms V4 Pro.
-// Gemini: gemini-3.8-flash is Google's most intelligent Flash model.
+// ── UPDATED: Switched Gemini to the faster 2.5-flash model ──
 const PROVIDERS = {
   deepseek: {
     name: 'DeepSeek V4.1 Flash',
@@ -712,9 +709,9 @@ const PROVIDERS = {
     reasoningModel: 'deepseek-flash',
   },
   gemini: {
-    name: 'Gemini 3.8 Flash',
+    name: 'Gemini 2.5 Flash',
     url: PROXY_URL + '?provider=gemini',
-    model: 'gemini-3.8-flash',
+    model: 'gemini-2.5-flash',
     supportsVision: true,
     format: 'gemini',
   },
@@ -814,7 +811,6 @@ function creditsStorageKey() { return 'credits_' + accountKey(); }
 function projectsStorageKey() { return PROJECTS_KEY_PREFIX + accountKey(); }
 let PROJECTS_KEY = PROJECTS_KEY_PREFIX + USER_ID;
 
-// ── FIXED: saveCredits was defined but never called ──
 function saveCredits() { try { localStorage.setItem(creditsStorageKey(), String(credits)); } catch {} }
 function saveUsage() { try { localStorage.setItem(USAGE_KEY, JSON.stringify(usageStats)); } catch {} }
 
@@ -1050,9 +1046,10 @@ function openSettings() {
   document.getElementById('maxTokensInput').value = userSettings.maxTokens;
   const modelSelect = document.getElementById('modelSelect');
   modelSelect.innerHTML = '<option value="">Auto (router decides)</option>';
+  // Updated to reflect Gemini 2.5 Flash
   const modelsByProvider = {
     deepseek: ['deepseek-flash'],
-    gemini: ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3.5-flash-lite'],
+    gemini: ['gemini-2.5-flash', 'gemini-2.5-flash-lite'],
   };
   for (const [pid, models] of Object.entries(modelsByProvider)) {
     if (!keyIsValid(pid)) continue;
@@ -1198,7 +1195,6 @@ function handleSearchKeydown(e) {
 async function streamOpenAI({ cfg, providerId, messages, model, onChunk, onReasoning, signal }) {
   const headers = { 'Content-Type': 'application/json' };
   const body = { model, messages, temperature: userSettings.temperature, max_tokens: userSettings.maxTokens, stream: true };
-  // DeepSeek V4.1 Flash: enable thinking via reasoning_effort
   if (cfg.nativeReasoning && thinkingEnabled) body.reasoning_effort = 'high';
 
   const res = await fetch(cfg.url, { method: 'POST', headers, signal, body: JSON.stringify(body) });
@@ -1553,7 +1549,6 @@ async function runGeneration({ p, userText, attachments, chain, combined }) {
       if (!result.text && !result.reasoningContent) throw new Error('Empty response');
       const elapsed = Math.round(performance.now() - t0);
 
-      // Update usage stats
       usageStats.totalInputTokens += (result.inputTokens || 0);
       usageStats.totalOutputTokens += (result.outputTokens || 0);
       usageStats.totalReasoningTokens += (result.reasoningTokens || 0);
@@ -1589,7 +1584,6 @@ async function runGeneration({ p, userText, attachments, chain, combined }) {
       const finalHTML = thinkingHTML + renderMarkdown(finalAnswer) + footer;
       liveMsg.finalize(finalHTML);
 
-      // Store display with thinking info for re-rendering
       const displayEntry = { role: 'ai', html: finalHTML };
       p.history.push({ role: 'user', content: combined || '[attachment]' });
       p.history.push({ role: 'assistant', content: result.text || finalAnswer });
@@ -1760,7 +1754,6 @@ function confirmEditAndResend() {
   inputBox.value = text; updateCharCount(); sendMessage();
 }
 
-// ── FIXED: deleteMessage now correctly removes history entries ──
 function deleteMessage(displayIndex) {
   if (!ensureSignedIn()) return;
   const p = getActiveProject(); if (!p) return;
@@ -1776,7 +1769,6 @@ function deleteMessage(displayIndex) {
   }});
 }
 
-// ── FIXED: regenerateResponse now correctly identifies the target AI message ──
 function regenerateResponse(btn) {
   if (!ensureSignedIn()) return;
   if (isGenerating) return;
@@ -1787,7 +1779,6 @@ function regenerateResponse(btn) {
   const messages = Array.from(chatContainer.querySelectorAll('.message'));
   const idx = messages.indexOf(messageEl);
   if (idx < 0) return;
-  // Find the display index of this AI message
   let displayIdx = -1;
   let displayCount = 0;
   for (let i = 0; i < p.display.length; i++) {
@@ -1795,7 +1786,6 @@ function regenerateResponse(btn) {
     displayCount++;
   }
   if (displayIdx < 0) { alert('Cannot locate message.'); return; }
-  // Find the preceding user message
   let userText = '';
   for (let i = displayIdx - 1; i >= 0; i--) {
     if (p.display[i].role === 'user') {
@@ -1804,9 +1794,7 @@ function regenerateResponse(btn) {
     }
   }
   if (!userText) { alert('Cannot find original message.'); return; }
-  // Trim display and history up to the user message
   p.display = p.display.slice(0, displayIdx);
-  // Rebuild history by counting user/assistant pairs up to displayIdx
   let keep = 0;
   for (let i = 0; i < displayIdx; i++) keep += (p.display[i].role === 'user') ? 2 : 0;
   p.history = p.history.slice(0, keep);
