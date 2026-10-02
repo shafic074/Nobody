@@ -697,7 +697,6 @@ Rules:
 
 const PROXY_URL = "https://nobody-ai-proxy.shafick074.workers.dev";
 
-// ── UPDATED: Switched Gemini to the faster 2.5-flash model ──
 const PROVIDERS = {
   deepseek: {
     name: 'DeepSeek V4.1 Flash',
@@ -786,7 +785,6 @@ let userSettings = { systemPrompt: '', model: '', temperature: 0.2, maxTokens: 8
 let requestTimestamps = [];
 let usageStats = { totalInputTokens: 0, totalOutputTokens: 0, totalReasoningTokens: 0, totalRequests: 0 };
 
-// Search state
 let searchMatches = [];
 let currentSearchIndex = -1;
 
@@ -886,7 +884,6 @@ async function loadFromCloud(uid) {
 
 function getActiveProject() { return allProjects.find(p => p.id === activeProjectId); }
 
-// ── TOAST NOTIFICATIONS ──
 function showToast(message, type = 'info', duration = 3000) {
   const container = document.getElementById('toastContainer');
   const toast = document.createElement('div');
@@ -1046,7 +1043,6 @@ function openSettings() {
   document.getElementById('maxTokensInput').value = userSettings.maxTokens;
   const modelSelect = document.getElementById('modelSelect');
   modelSelect.innerHTML = '<option value="">Auto (router decides)</option>';
-  // Updated to reflect Gemini 2.5 Flash
   const modelsByProvider = {
     deepseek: ['deepseek-flash'],
     gemini: ['gemini-2.5-flash', 'gemini-2.5-flash-lite'],
@@ -1241,7 +1237,8 @@ async function streamGemini({ cfg, contents, onChunk, onReasoning, signal }) {
     generationConfig: {
       temperature: userSettings.temperature,
       maxOutputTokens: userSettings.maxTokens,
-      thinkingConfig: { includeThoughts: true, thinkingLevel: 'high' },
+      // FIXED: Removed thinkingLevel because it's not supported by gemini-2.5-flash
+      thinkingConfig: { includeThoughts: true },
     },
   };
   const res = await fetch(cfg.url, { method: 'POST', headers, signal, body: JSON.stringify(body) });
