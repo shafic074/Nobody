@@ -662,31 +662,35 @@ Rules:
 
 const PROXY_URL = "https://nobody-ai-proxy.shafick074.workers.dev";
 
-// ── NVIDIA NIM: Updated to verified model IDs (corrected 404 error) ──
+// ── BUG FIX: Corrected NVIDIA model IDs + added Groq fallback for coding ──
 const PROVIDERS = {
-  glm: {
-    name: 'GLM-5.3 Flash (NVIDIA)',
+  // Primary NVIDIA coding model (verified free tier, Sept 2026)
+  deepseek: {
+    name: 'DeepSeek V4 Flash (NVIDIA)',
     url: PROXY_URL + '?provider=deepseek',
-    model: 'z-ai/glm-5.3-flash',
+    model: 'deepseek-ai/deepseek-v4-flash',
     supportsVision: true,
     format: 'openai',
     nativeReasoning: true,
   },
-  devstral: {
-    name: 'Devstral-2-123B (NVIDIA)',
+  // Advanced reasoning model (verified free tier)
+  deepseekPro: {
+    name: 'DeepSeek V4 Pro (NVIDIA)',
     url: PROXY_URL + '?provider=deepseekPro',
-    model: 'mistralai/devstral-2-123b-instruct-2512',
+    model: 'deepseek-ai/deepseek-v4-pro',
     supportsVision: false,
     format: 'openai',
-    nativeReasoning: false,
+    nativeReasoning: true,
   },
+  // Fast fallback — now reachable for coding tasks
   groq: {
     name: 'Groq',
     url: PROXY_URL + '?provider=groq',
-    model: 'llama-3.3-70b-versatile',
+    model: 'qwen/qwen3-32b',
     supportsVision: false,
     format: 'openai',
   },
+  // Free coding backup via OpenRouter
   openrouter: {
     name: 'OpenRouter',
     url: PROXY_URL + '?provider=openrouter',
@@ -694,16 +698,17 @@ const PROVIDERS = {
     supportsVision: false,
     format: 'openai',
   },
+  // Vision + multimodal
   gemini: {
     name: 'Gemini',
     url: PROXY_URL + '?provider=gemini',
-    model: 'gemini-3.6-flash',
+    model: 'gemini-3.8-flash',
     supportsVision: true,
     format: 'gemini',
   },
 };
 
-const PROVIDER_TOKEN_BUDGETS = { groq: 6000, gemini: 200000, glm: 1000000, devstral: 262000, openrouter: 20000, default: 12000 };
+const PROVIDER_TOKEN_BUDGETS = { groq: 6000, gemini: 200000, deepseek: 1000000, deepseekPro: 1000000, openrouter: 20000, default: 12000 };
 
 function keyIsValid(id) { return !!PROVIDERS[id]; }
 function estimateTokens(text) { if (!text) return 0; if (typeof text !== 'string') text = JSON.stringify(text); return Math.ceil(text.length / 4); }
@@ -732,7 +737,7 @@ function isCodeFile(name) {
 }
 function detectCodeIntent(text) { const lower = (text || '').toLowerCase(); let score = 0; for (const kw of CODE_KEYWORDS) if (lower.includes(kw)) score += 1; return score; }
 
-// ── PROFESSIONAL ROUTER: GLM + Devstral exclusively for coding ──
+// ── BUG FIX: Router now falls through to Groq/OpenRouter if NVIDIA fails ──
 function selectProviderChain(userText, attachments) {
   const available = Object.keys(PROVIDERS).filter(keyIsValid);
   if (!available.length) return [];
@@ -744,48 +749,47 @@ function selectProviderChain(userText, attachments) {
   const codeScore = detectCodeIntent(userText);
   const isCodingTask = codeScore >= 1 || hasCodeFile;
 
-  // ── RULE: ONLY GLM + Devstral for coding tasks ──
+  // ── RULE: Prefer NVIDIA for coding, but allow Groq/OpenRouter as fallbacks ──
   if (isCodingTask) {
-    const nimCodingModels = ['glm', 'devstral'].filter(id => available.includes(id));
-    if (nimCodingModels.length > 0) {
-      // If there's an image, we must use a vision-capable model
+    const codingChain = ['deepseek', 'deepseekPro', 'groq', 'openrouter'].filter(id => available.includes(id));
+    if (codingChain.length > 0) {
+      // If there's an image, we must include a vision-capable model first
       if (hasImage) {
-        return ['gemini', 'glm', 'devstral'].filter(id => nimCodingModels.includes(id) || id === 'gemini');
+        return ['gemini', ...codingChain].filter((id, i, arr) => arr.indexOf(id) === i);
       }
-      // Otherwise, prioritize GLM-5.3 for highest quality, then Devstral
-      return nimCodingModels;
+      return codingChain;
     }
   }
 
-  if (hasImage) return ['gemini', 'glm', 'openrouter'].filter(id => available.includes(id));
+  if (hasImage) return ['gemini', 'deepseek', 'openrouter'].filter(id => available.includes(id));
 
   const scores = {};
   const add = (id, pts) => { if (available.includes(id)) scores[id] = (scores[id] || 0) + pts; };
 
-  if (hasPdf || textLen > 4000) { add('gemini', 10); add('glm', 8); add('devstral', 5); }
+  if (hasPdf || textLen > 4000) { add('gemini', 10); add('deepseekPro', 8); add('deepseek', 5); }
   if (codeScore >= 1 || hasCodeFile) {
-    add('glm', 15 + Math.min(codeScore, 5));
-    add('devstral', 12 + Math.min(codeScore, 3));
+    add('deepseekPro', 15 + Math.min(codeScore, 5));
+    add('deepseek', 12 + Math.min(codeScore, 3));
     add('groq', 8);
     add('openrouter', 6);
   }
   if (!hasPdf && !hasCodeFile && codeScore === 0 && textLen > 0 && textLen < 200) {
     add('groq', 10);
-    add('glm', 8);
+    add('deepseek', 8);
     add('gemini', 5);
   }
   if (!hasPdf && !hasCodeFile && codeScore === 0 && textLen >= 200 && textLen <= 4000) {
-    add('glm', 8);
+    add('deepseek', 8);
     add('groq', 6);
-    add('devstral', 5);
+    add('deepseekPro', 5);
     add('gemini', 4);
   }
   if (!Object.keys(scores).length) {
-    add('glm', 5); add('groq', 4); add('devstral', 3); add('gemini', 2); add('openrouter', 1);
+    add('deepseek', 5); add('groq', 4); add('deepseekPro', 3); add('gemini', 2); add('openrouter', 1);
   }
 
   const ranked = Object.entries(scores).sort((a, b) => b[1] - a[1]).map(([id]) => id);
-  const fallbackOrder = ['glm', 'devstral', 'groq', 'openrouter', 'gemini'];
+  const fallbackOrder = ['deepseek', 'deepseekPro', 'groq', 'openrouter', 'gemini'];
   for (const id of fallbackOrder) if (available.includes(id) && !ranked.includes(id)) ranked.push(id);
   return ranked;
 }
@@ -1055,13 +1059,12 @@ function openSettings() {
   document.getElementById('maxTokensInput').value = userSettings.maxTokens;
   const modelSelect = document.getElementById('modelSelect');
   modelSelect.innerHTML = '<option value="">Auto (router decides)</option>';
-  // ── UPDATED: Corrected model IDs ──
   const modelsByProvider = {
-    glm:         ['z-ai/glm-5.3-flash'],
-    devstral:    ['mistralai/devstral-2-123b-instruct-2512'],
-    groq:        ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'],
+    deepseek:    ['deepseek-ai/deepseek-v4-flash'],
+    deepseekPro: ['deepseek-ai/deepseek-v4-pro'],
+    groq:        ['qwen/qwen3-32b', 'llama-3.3-70b-versatile', 'llama-3.1-8b-instant'],
     openrouter:  ['qwen/qwen3-coder:free', 'nvidia/nemotron-3.5-lightning:free'],
-    gemini:      ['gemini-3.6-flash', 'gemini-2.5-flash-lite'],
+    gemini:      ['gemini-3.8-flash', 'gemini-2.5-flash-lite'],
   };
   for (const [pid, models] of Object.entries(modelsByProvider)) {
     if (!keyIsValid(pid)) continue;
@@ -1165,7 +1168,6 @@ async function streamOpenAI({ cfg, providerId, messages, model, onChunk, onReaso
     stream: true,
   };
 
-  // NVIDIA NIM: enable native reasoning if supported
   if (cfg.nativeReasoning) {
     body.chat_template_kwargs = { thinking: true };
   }
