@@ -124,6 +124,9 @@
   .btn{background:var(--bg-surface);border:1px solid var(--border);color:var(--text-main);padding:7px 12px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit}
   .btn:hover{background:var(--bg-surface-hover);border-color:var(--border-light)}
   .btn.danger{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.35);color:#FCA5A5}
+  .btn.brain-btn{background:rgba(139,92,246,.12);border-color:rgba(139,92,246,.35);color:#C4B5FD;position:relative}
+  .btn.brain-btn:hover{background:rgba(139,92,246,.2);border-color:rgba(139,92,246,.55)}
+  .brain-count{background:rgba(139,92,246,.25);color:#C4B5FD;padding:1px 6px;border-radius:8px;font-size:10px;font-weight:700;margin-left:2px;font-family:var(--font-mono)}
   .icon-toggle,.voice-toggle{display:inline-flex;align-items:center;gap:6px;background:var(--bg-surface);border:1px solid var(--border);color:var(--text-muted);padding:7px 11px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap}
   .icon-toggle:hover,.voice-toggle:hover{background:var(--bg-surface-hover);color:var(--text-main)}
   .icon-toggle.on{background:rgba(139,92,246,.15);border-color:rgba(139,92,246,.45);color:#C4B5FD}
@@ -153,6 +156,7 @@
   .connecting-indicator{display:flex;align-items:center;gap:8px;padding:6px 0;color:var(--text-muted);font-size:12.5px;font-style:italic}
   .connecting-indicator .spinner{width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
+  .memory-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.3);color:#C4B5FD;padding:3px 9px;border-radius:8px;font-size:10.5px;font-weight:600;margin-top:8px}
   .thinking-panel{margin:0 0 10px;border:1px solid var(--border-thinking);border-radius:10px;background:var(--bg-thinking);overflow:hidden}
   .thinking-header{display:flex;align-items:center;gap:8px;padding:8px 11px 8px 13px;cursor:pointer;user-select:none}
   .thinking-header:hover{background:rgba(139,92,246,.06)}
@@ -265,6 +269,16 @@
   .search-count{font-size:11.5px;color:var(--text-muted);font-family:var(--font-mono);min-width:60px;text-align:right}
   .search-nav-btn{background:transparent;border:1px solid var(--border);color:var(--text-muted);width:28px;height:28px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center}
   .search-nav-btn:hover{background:var(--bg-surface-hover);color:var(--text-main)}
+  /* BRAIN MODAL */
+  .brain-stat-row{display:flex;gap:8px;margin-bottom:14px}
+  .brain-stat{flex:1;background:var(--bg-surface-2);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center}
+  .brain-stat-value{font-size:20px;font-weight:700;color:var(--primary-light);font-family:var(--font-mono)}
+  .brain-stat-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+  .brain-fact-row{display:flex;align-items:flex-start;gap:9px;background:var(--bg-surface-2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;margin-bottom:6px}
+  .brain-fact-text{flex:1;font-size:13px;color:var(--text-main);line-height:1.5;word-break:break-word}
+  .brain-fact-meta{font-size:10px;color:var(--text-dark);margin-top:3px;font-family:var(--font-mono)}
+  .brain-fact-actions{display:flex;gap:3px;flex-shrink:0}
+  .brain-add-row{display:flex;gap:6px;margin-top:10px}
   /* DEBUG */
   .debug-panel{margin-top:10px;padding:10px 12px;background:var(--bg-surface-2);border:1px solid var(--border);border-radius:8px;font-family:var(--font-mono);font-size:11px;line-height:1.6;color:var(--text-secondary)}
   .debug-panel .debug-title{color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-size:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
@@ -281,6 +295,7 @@
   .toast.success{border-color:rgba(16,185,129,.5);color:var(--success-light)}
   .toast.error{border-color:rgba(239,68,68,.5);color:#FCA5A5}
   .toast.info{border-color:rgba(99,102,241,.5);color:var(--primary-light)}
+  .toast.brain{border-color:rgba(139,92,246,.6);color:#C4B5FD;background:linear-gradient(135deg,rgba(139,92,246,.15),rgba(99,102,241,.1))}
   @keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
   /* MODALS */
   .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:300;opacity:0;transition:opacity .25s;padding:20px}
@@ -288,7 +303,7 @@
   .modal-overlay.active{display:flex;opacity:1}
   .modal{background:var(--bg-surface);border:1px solid var(--border-light);border-radius:var(--radius-xl);padding:24px;width:100%;box-shadow:var(--shadow-lg);transform:translateY(14px) scale(.97);transition:transform .28s;max-height:85vh;display:flex;flex-direction:column;outline:none}
   .modal-overlay.active .modal{transform:translateY(0) scale(1)}
-  .modal.modal-sm{max-width:400px}.modal.modal-md{max-width:520px}
+  .modal.modal-sm{max-width:400px}.modal.modal-md{max-width:520px}.modal.modal-lg{max-width:620px}
   .modal h2{font-size:17px;margin-bottom:8px;font-weight:700;display:flex;align-items:center;gap:10px}
   .modal p{font-size:13px;color:var(--text-secondary);margin-bottom:18px;line-height:1.6}
   .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;flex-shrink:0}
@@ -296,6 +311,7 @@
   .modal-icon.primary{background:var(--primary-gradient);color:#fff}
   .modal-icon.danger{background:rgba(239,68,68,.15);color:#FCA5A5}
   .modal-icon.success{background:rgba(16,185,129,.15);color:var(--success-light)}
+  .modal-icon.brain{background:linear-gradient(135deg,#8B5CF6,#6366F1);color:#fff}
   .input-field,.textarea-field{width:100%;background:var(--bg-body);border:1px solid var(--border);border-radius:10px;padding:11px 13px;color:var(--text-main);font-size:14px;font-family:inherit;outline:none}
   .textarea-field{min-height:80px;resize:vertical;line-height:1.5}
   .input-field:focus,.textarea-field:focus{border-color:rgba(99,102,241,.55);box-shadow:0 0 0 3px rgba(99,102,241,.15)}
@@ -312,6 +328,8 @@
   .btn-primary{display:inline-flex;align-items:center;gap:7px;background:var(--primary-gradient);border:none;color:#fff;padding:9px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 2px 12px rgba(99,102,241,.3)}
   .btn-primary:hover{box-shadow:var(--shadow-glow)}
   .btn-primary:disabled{opacity:.5;cursor:not-allowed}
+  .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-secondary);padding:9px 14px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit}
+  .btn-ghost:hover{background:var(--bg-surface-hover);color:var(--text-main)}
   /* PREVIEW */
   .preview-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;z-index:250;padding:20px}
   .preview-modal-overlay.active{display:flex}
@@ -377,6 +395,7 @@
     .signin-gate h2{font-size:22px}
     .signin-gate-icon{width:68px;height:68px;font-size:32px;border-radius:20px}
     .search-overlay{padding:8px 10px}
+    .brain-stat-row{flex-direction:column}
   }
   @media(min-width:769px){.hamburger{display:none}.sidebar-overlay{display:none!important}}
 </style>
@@ -426,6 +445,11 @@
       <div class="header-right">
         <button class="btn" onclick="openSearchOverlay()" title="Search messages (⌘F)" style="display:none" id="searchMsgBtn">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
+        <button class="btn brain-btn" onclick="openBrainModal()" title="Project brain (⌘B)" style="display:none" id="brainBtn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path></svg>
+          <span id="brainBtnLabel">Brain</span>
+          <span class="brain-count" id="brainCount">0</span>
         </button>
         <button class="icon-toggle" id="thinkingToggle" onclick="toggleThinking()" title="Deep thinking mode">
           <svg class="icon-off" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path></svg>
@@ -486,6 +510,31 @@
   <h2><div class="modal-icon danger"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div><span id="confirmTitle">Confirm</span></h2>
   <p id="confirmMessage">Are you sure?</p>
   <div class="modal-actions"><button class="btn" onclick="closeConfirm()">Cancel</button><button class="btn danger" onclick="confirmAction()" id="confirmOk">Confirm</button></div>
+</div></div>
+
+<!-- BRAIN MODAL -->
+<div class="modal-overlay" id="brainModal"><div class="modal modal-lg" tabindex="-1">
+  <h2><div class="modal-icon brain"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path></svg></div>Project Brain</h2>
+  <p>Everything the AI has learned about this project. This memory is silently injected into every reply so you never have to repeat yourself.</p>
+  <div class="modal-scroll">
+    <div class="brain-stat-row">
+      <div class="brain-stat"><div class="brain-stat-value" id="brainStatFacts">0</div><div class="brain-stat-label">Facts</div></div>
+      <div class="brain-stat"><div class="brain-stat-value" id="brainStatChars">0</div><div class="brain-stat-label">Chars</div></div>
+      <div class="brain-stat"><div class="brain-stat-value" id="brainStatUpdated">—</div><div class="brain-stat-label">Last update</div></div>
+    </div>
+    <div id="brainFactsList"></div>
+    <div class="brain-add-row">
+      <input type="text" class="input-field" id="brainNewFact" placeholder="Add a fact… e.g., 'Uses PostgreSQL 16 with Prisma ORM'" maxlength="300" autocomplete="off">
+      <button class="btn-primary" onclick="addBrainFactFromInput()" style="flex-shrink:0">Add</button>
+    </div>
+  </div>
+  <div class="modal-actions" style="justify-content:space-between">
+    <button class="btn-ghost" onclick="clearBrain()">Clear all facts</button>
+    <div style="display:flex;gap:8px">
+      <button class="btn" onclick="closeBrainModal()">Close</button>
+      <button class="btn-primary" onclick="closeBrainModal()">Done</button>
+    </div>
+  </div>
 </div></div>
 
 <div class="modal-overlay" id="authModal">
@@ -558,6 +607,12 @@
     <div class="field-row">
       <div class="field-group"><label class="field-label">Temperature</label><input type="number" class="input-field" id="tempInput" min="0" max="2" step="0.1" value="0.2"></div>
       <div class="field-group"><label class="field-label">Max tokens</label><input type="number" class="input-field" id="maxTokensInput" min="256" max="32000" step="256" value="8192"></div>
+    </div>
+    <div class="field-group" style="padding-top:8px;border-top:1px solid var(--border)">
+      <label class="field-label">Project Brain</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-secondary);cursor:pointer">
+        <input type="checkbox" id="brainEnabledInput" checked style="width:16px;height:16px;accent-color:var(--primary)"> Auto-learn facts from conversations
+      </label>
     </div>
   </div>
   <div class="modal-actions"><button class="btn" onclick="closeSettings()">Cancel</button><button class="btn-primary" onclick="saveSettings()">Save</button></div>
@@ -666,7 +721,7 @@ const MAX_FILE_BYTES = 10 * 1024 * 1024;
 const MAX_IMAGE_DIMENSION = 1600;
 const IMAGE_QUALITY = 0.85;
 const FETCH_TIMEOUT_MS = 90000;
-const PROJECTS_KEY_PREFIX = 'projects_v7_';
+const PROJECTS_KEY_PREFIX = 'projects_v8_'; // bumped for brain schema
 const AUTOPLAY_KEY = 'autoplay_voice_v1';
 const VOICE_KEY = 'preferred_voice_v1';
 const THINKING_KEY = 'thinking_enabled_v1';
@@ -675,7 +730,13 @@ const SETTINGS_KEY = 'settings_v1';
 const USAGE_KEY = 'usage_stats_v1';
 const DEBUG_MODE = true;
 
+// Brain limits — keep prompts small
+const BRAIN_MAX_FACTS = 60;
+const BRAIN_MAX_FACT_CHARS = 300;
+const BRAIN_MAX_TOTAL_CHARS = 4000;
+
 if (window.pdfjsLib) {
+  pdfjsLib.globalWorkerOptions = pdfjsLib.GlobalWorkerOptions || {};
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 }
 
@@ -694,6 +755,22 @@ Rules:
 - If the user's request is ambiguous, state your assumptions and proceed.
 - When providing code, use fenced markdown code blocks with the correct language tag.
 - Do not include unnecessary preamble or apologies. Get straight to the solution.`;
+
+// Memory extraction instruction appended to system prompt when brain is enabled
+const MEMORY_INSTRUCTION = `PROJECT MEMORY PROTOCOL:
+You are equipped with a persistent memory for this specific project. Below, under "PROJECT MEMORY", you will find everything you already know about this project (tech stack, conventions, decisions, user preferences, file names, etc.).
+
+Rules for using memory:
+- NEVER ask the user to re-explain anything already in PROJECT MEMORY.
+- Treat memory as authoritative ground truth for this project.
+- If the user's request contradicts memory, follow the user's latest instruction and note the correction.
+
+At the very end of every response, output a JSON block containing any NEW facts you learned that are worth remembering for future turns. Format it exactly like this (and this block will be hidden from the user):
+
+<memory>[{"text":"Concise fact, one sentence, third-person, present tense.","category":"stack|convention|decision|preference|glossary|file|other"}]</memory>
+
+If you learned nothing new, output: <memory>[]</memory>
+Only include facts that are persistent (not transient like "user just said hello"). Keep each fact under 200 characters. Maximum 3 new facts per turn.`;
 
 const PROXY_URL = "https://nobody-ai-proxy.shafick074.workers.dev";
 
@@ -741,13 +818,10 @@ function trimHistory(history, providerId, userContent) {
   return trimmed;
 }
 
-const CODE_KEYWORDS = ['code','function','class','method','debug','bug','error','exception','refactor','optimize','compile','syntax','algorithm','regex','api','endpoint','database','query','sql','python','javascript','typescript','java','c++','rust','go','react','node','express','django','flask','html','css','json','xml','write a script','fix this','implement','build a','write a program','unit test','test case','explain this code'];
-
 function isCodeFile(name) {
   const ext = (name.split('.').pop() || '').toLowerCase();
   return ['py','js','jsx','ts','tsx','html','htm','css','scss','java','c','cpp','cc','h','hpp','go','rs','rb','php','sh','bash','sql','kt','swift','dart','vue','svelte','json','xml','yaml','yml'].includes(ext);
 }
-function detectCodeIntent(text) { const lower = (text || '').toLowerCase(); let score = 0; for (const kw of CODE_KEYWORDS) if (lower.includes(kw)) score += 1; return score; }
 
 function selectProviderChain(userText, attachments) {
   const available = Object.keys(PROVIDERS).filter(keyIsValid);
@@ -755,6 +829,137 @@ function selectProviderChain(userText, attachments) {
   const hasImage = attachments.some(a => a.type === 'image');
   if (hasImage) return ['gemini', 'deepseek'].filter(id => available.includes(id));
   return ['deepseek', 'gemini'].filter(id => available.includes(id));
+}
+
+// ============================================================
+//  BRAIN (Project Memory)
+// ============================================================
+
+/** Create an empty brain. */
+function newBrain() {
+  return { facts: [], enabled: true, lastUpdated: null };
+}
+
+/** Ensure a project has a valid brain. Migration-safe. */
+function ensureBrain(p) {
+  if (!p) return;
+  if (!p.brain || typeof p.brain !== 'object') p.brain = newBrain();
+  if (!Array.isArray(p.brain.facts)) p.brain.facts = [];
+  if (typeof p.brain.enabled !== 'boolean') p.brain.enabled = true;
+  // Normalize facts
+  p.brain.facts = p.brain.facts
+    .filter(f => f && typeof f.text === 'string' && f.text.trim())
+    .map(f => ({
+      id: f.id || ('f_' + Math.random().toString(36).slice(2, 10)),
+      text: String(f.text).slice(0, BRAIN_MAX_FACT_CHARS).trim(),
+      category: f.category || 'other',
+      createdAt: f.createdAt || Date.now(),
+      source: f.source || 'auto',
+    }));
+  // Enforce total limit
+  if (p.brain.facts.length > BRAIN_MAX_FACTS) {
+    p.brain.facts = p.brain.facts.slice(-BRAIN_MAX_FACTS);
+  }
+  // Enforce char budget
+  let totalChars = 0;
+  const kept = [];
+  for (let i = p.brain.facts.length - 1; i >= 0; i--) {
+    const f = p.brain.facts[i];
+    if (totalChars + f.text.length > BRAIN_MAX_TOTAL_CHARS) break;
+    kept.unshift(f);
+    totalChars += f.text.length;
+  }
+  p.brain.facts = kept;
+}
+
+/** Add facts (deduped, capped). Returns number actually added. */
+function addBrainFacts(project, newFacts, source = 'auto') {
+  if (!project) return 0;
+  ensureBrain(project);
+  if (!project.brain.enabled) return 0;
+  let added = 0;
+  const norm = s => s.toLowerCase().replace(/\s+/g, ' ').trim();
+  const existing = new Set(project.brain.facts.map(f => norm(f.text)));
+  for (const f of newFacts) {
+    if (!f || typeof f.text !== 'string') continue;
+    let text = f.text.slice(0, BRAIN_MAX_FACT_CHARS).trim();
+    if (!text || text.length < 8) continue;
+    const key = norm(text);
+    if (existing.has(key)) continue;
+    // Fuzzy: skip if an existing fact contains this or vice versa
+    let isDupe = false;
+    for (const e of existing) {
+      if (e.includes(key) || key.includes(e)) { isDupe = true; break; }
+    }
+    if (isDupe) continue;
+    const cat = ['stack','convention','decision','preference','glossary','file','other'].includes(f.category) ? f.category : 'other';
+    project.brain.facts.push({
+      id: 'f_' + Math.random().toString(36).slice(2, 10),
+      text,
+      category: cat,
+      createdAt: Date.now(),
+      source,
+    });
+    existing.add(key);
+    added++;
+  }
+  if (added > 0) {
+    project.brain.lastUpdated = Date.now();
+    // Enforce caps
+    if (project.brain.facts.length > BRAIN_MAX_FACTS) {
+      project.brain.facts = project.brain.facts.slice(-BRAIN_MAX_FACTS);
+    }
+  }
+  return added;
+}
+
+/** Format brain for system prompt injection. */
+function formatProjectMemory(project) {
+  if (!project) return '';
+  ensureBrain(project);
+  if (!project.brain.enabled || !project.brain.facts.length) return '';
+  const byCat = {};
+  for (const f of project.brain.facts) {
+    (byCat[f.category] = byCat[f.category] || []).push(f.text);
+  }
+  const order = ['stack','convention','decision','preference','glossary','file','other'];
+  const labels = {
+    stack: 'Tech stack', convention: 'Conventions', decision: 'Architecture decisions',
+    preference: 'User preferences', glossary: 'Glossary', file: 'Files & modules', other: 'Other facts'
+  };
+  const lines = ['PROJECT MEMORY (things you already know — do NOT ask again):'];
+  for (const cat of order) {
+    if (!byCat[cat] || !byCat[cat].length) continue;
+    lines.push(`\n[${labels[cat]}]`);
+    for (const t of byCat[cat]) lines.push('- ' + t);
+  }
+  return lines.join('\n');
+}
+
+/** Extract <memory>JSON</memory> from text; return clean text + facts. */
+function extractMemoryBlock(text) {
+  if (!text) return { text: '', facts: [] };
+  const re = /<memory>([\s\S]*?)<\/memory>/i;
+  const m = text.match(re);
+  let facts = [];
+  if (m) {
+    try {
+      const parsed = JSON.parse(m[1].trim());
+      if (Array.isArray(parsed)) {
+        facts = parsed.filter(x => x && typeof x.text === 'string');
+      }
+    } catch {}
+    // Also try a lenient parse: strip trailing commas, fix single quotes on keys
+    if (!facts.length) {
+      try {
+        const cleaned = m[1].trim().replace(/,\s*([\]}])/g, '$1');
+        const parsed = JSON.parse(cleaned);
+        if (Array.isArray(parsed)) facts = parsed.filter(x => x && typeof x.text === 'string');
+      } catch {}
+    }
+  }
+  const clean = text.replace(re, '').trim();
+  return { text: clean, facts };
 }
 
 // ============================================================
@@ -783,7 +988,7 @@ let cloudSyncEnabled = false;
 let currentAuthMode = 'signin';
 let userSettings = { systemPrompt: '', model: '', temperature: 0.2, maxTokens: 8192 };
 let requestTimestamps = [];
-let usageStats = { totalInputTokens: 0, totalOutputTokens: 0, totalReasoningTokens: 0, totalRequests: 0 };
+let usageStats = { totalInputTokens: 0, totalOutputTokens: 0, totalReasoningTokens: 0, totalRequests: 0, totalBrainFactsLearned: 0 };
 
 let searchMatches = [];
 let currentSearchIndex = -1;
@@ -816,10 +1021,12 @@ function buildSafeProjects(projects) {
   return projects.map(p => ({
     ...p,
     pendingAttachments: (p.pendingAttachments || []).map(a => ({ name: a.name, type: a.type, mimeType: a.mimeType, text: a.text })),
+    brain: p.brain || newBrain(),
   }));
 }
 
 function saveAll() {
+  allProjects.forEach(p => ensureBrain(p));
   const safe = buildSafeProjects(allProjects);
   try {
     localStorage.setItem(PROJECTS_KEY, JSON.stringify({ projects: safe, activeProjectId }));
@@ -835,10 +1042,15 @@ function saveAll() {
   saveCredits();
   saveUsage();
   scheduleCloudSave();
+  updateBrainBadge();
 }
 
 function stripForCloud(p) {
-  return { id: p.id, name: p.name, history: p.history, display: p.display, pendingAttachments: [], createdAt: p.createdAt, updatedAt: p.updatedAt };
+  return {
+    id: p.id, name: p.name, history: p.history, display: p.display,
+    pendingAttachments: [], createdAt: p.createdAt, updatedAt: p.updatedAt,
+    brain: p.brain || newBrain(),
+  };
 }
 
 function scheduleCloudSave() {
@@ -859,11 +1071,12 @@ function loadAll() {
   const data = readProjectsFromKey(PROJECTS_KEY);
   if (data) { allProjects = Array.isArray(data.projects) ? data.projects : []; activeProjectId = data.activeProjectId || null; }
   else { allProjects = []; activeProjectId = null; }
-  allProjects.forEach(p => { if (!Array.isArray(p.pendingAttachments)) p.pendingAttachments = []; });
+  allProjects.forEach(p => { if (!Array.isArray(p.pendingAttachments)) p.pendingAttachments = []; ensureBrain(p); });
   allProjects = allProjects.filter(p => p && typeof p.name === 'string' && p.id);
   if (!allProjects.length) activeProjectId = null;
   else if (!allProjects.find(p => p.id === activeProjectId)) { allProjects.sort((a, b) => b.updatedAt - a.updatedAt); activeProjectId = allProjects[0].id; }
   updateDownloadButton();
+  updateBrainBadge();
 }
 
 async function loadFromCloud(uid) {
@@ -873,12 +1086,13 @@ async function loadFromCloud(uid) {
   activeProjectId = state.activeProjectId || null;
   credits = typeof state.credits === 'number' ? state.credits : FREE_TRIAL_CREDITS;
   if (state.usageStats) usageStats = { ...usageStats, ...state.usageStats };
-  allProjects.forEach(p => { if (!Array.isArray(p.pendingAttachments)) p.pendingAttachments = []; });
+  allProjects.forEach(p => { if (!Array.isArray(p.pendingAttachments)) p.pendingAttachments = []; ensureBrain(p); });
   allProjects = allProjects.filter(p => p && p.id && typeof p.name === 'string');
   if (!allProjects.length) activeProjectId = null;
   else if (!allProjects.find(p => p.id === activeProjectId)) { allProjects.sort((a, b) => b.updatedAt - a.updatedAt); activeProjectId = allProjects[0].id; }
   cloudSyncEnabled = true;
   updateCreditsBadge();
+  updateBrainBadge();
   return true;
 }
 
@@ -888,10 +1102,111 @@ function showToast(message, type = 'info', duration = 3000) {
   const container = document.getElementById('toastContainer');
   const toast = document.createElement('div');
   toast.className = 'toast ' + type;
-  const icons = { success: '✓', error: '✕', info: 'ℹ' };
+  const icons = { success: '✓', error: '✕', info: 'ℹ', brain: '🧠' };
   toast.innerHTML = `<span>${icons[type] || 'ℹ'}</span><span>${escapeHtml(message)}</span>`;
   container.appendChild(toast);
   setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(10px)'; toast.style.transition = 'all .25s'; setTimeout(() => toast.remove(), 250); }, duration);
+}
+
+// ============================================================
+//  BRAIN UI
+// ============================================================
+function updateBrainBadge() {
+  const p = getActiveProject();
+  const btn = document.getElementById('brainBtn');
+  const count = document.getElementById('brainCount');
+  if (!btn || !count) return;
+  if (!p) { btn.style.display = 'none'; return; }
+  ensureBrain(p);
+  const n = p.brain.facts.length;
+  count.textContent = String(n);
+  btn.style.display = 'flex';
+  // Show brain button only when signed in (same rule as other header buttons)
+  if (!currentUser) btn.style.display = 'none';
+}
+
+function openBrainModal() {
+  const p = getActiveProject(); if (!p) return;
+  ensureBrain(p);
+  renderBrainModal();
+  document.getElementById('brainModal').classList.add('active');
+  setTimeout(() => document.getElementById('brainNewFact').focus(), 100);
+}
+function closeBrainModal() { document.getElementById('brainModal').classList.remove('active'); }
+
+function renderBrainModal() {
+  const p = getActiveProject(); if (!p) return;
+  ensureBrain(p);
+  const facts = p.brain.facts.slice().sort((a, b) => b.createdAt - a.createdAt);
+  const totalChars = p.brain.facts.reduce((s, f) => s + f.text.length, 0);
+  document.getElementById('brainStatFacts').textContent = String(p.brain.facts.length);
+  document.getElementById('brainStatChars').textContent = String(totalChars);
+  document.getElementById('brainStatUpdated').textContent = p.brain.lastUpdated ? formatRelative(p.brain.lastUpdated) : '—';
+  const list = document.getElementById('brainFactsList');
+  if (!facts.length) {
+    list.innerHTML = '<div style="text-align:center;padding:24px 12px;color:var(--text-dark);font-size:12.5px;line-height:1.6">🧠 The brain is empty.<br>As you chat, the AI will silently learn and remember facts about this project. You can also add facts manually below.</div>';
+    return;
+  }
+  const catLabels = { stack:'Stack', convention:'Convention', decision:'Decision', preference:'Preference', glossary:'Glossary', file:'File', other:'Fact' };
+  list.innerHTML = facts.map(f => `
+    <div class="brain-fact-row" data-id="${f.id}">
+      <div class="brain-fact-text">
+        <span style="display:inline-block;background:rgba(139,92,246,.15);color:#C4B5FD;font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:5px;margin-right:6px;text-transform:uppercase;letter-spacing:.04em">${escapeHtml(catLabels[f.category] || 'Fact')}</span>
+        <span class="brain-fact-content" contenteditable="true" data-id="${f.id}" spellcheck="false">${escapeHtml(f.text)}</span>
+        <div class="brain-fact-meta">${f.source === 'user' ? '👤 added by you' : '🤖 learned'} · ${formatRelative(f.createdAt)}</div>
+      </div>
+      <div class="brain-fact-actions">
+        <button class="chat-item-action danger" title="Delete fact" onclick="deleteBrainFact('${f.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+      </div>
+    </div>
+  `).join('');
+  // Wire inline edit
+  list.querySelectorAll('.brain-fact-content').forEach(el => {
+    el.addEventListener('blur', () => {
+      const id = el.dataset.id;
+      const newText = (el.textContent || '').trim().slice(0, BRAIN_MAX_FACT_CHARS);
+      if (!newText) { renderBrainModal(); return; }
+      const proj = getActiveProject(); if (!proj) return;
+      const f = proj.brain.facts.find(x => x.id === id);
+      if (f && f.text !== newText) { f.text = newText; saveAll(); showToast('Fact updated', 'success', 1500); }
+    });
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
+    });
+  });
+}
+
+function addBrainFactFromInput() {
+  const input = document.getElementById('brainNewFact');
+  const text = (input.value || '').trim();
+  if (!text) return;
+  const p = getActiveProject(); if (!p) return;
+  const added = addBrainFacts(p, [{ text, category: 'other' }], 'user');
+  if (added > 0) { saveAll(); renderBrainModal(); input.value = ''; showToast('Fact added to brain', 'brain', 1800); }
+  else { showToast('That fact is already known', 'info', 1800); }
+}
+
+function deleteBrainFact(id) {
+  const p = getActiveProject(); if (!p) return;
+  ensureBrain(p);
+  p.brain.facts = p.brain.facts.filter(f => f.id !== id);
+  p.brain.lastUpdated = Date.now();
+  saveAll(); renderBrainModal();
+  showToast('Fact removed', 'info', 1500);
+}
+
+function clearBrain() {
+  const p = getActiveProject(); if (!p) return;
+  openConfirm({
+    title: 'Clear project brain?',
+    message: 'All learned facts about this project will be forgotten. The AI will have to relearn them.',
+    okText: 'Clear brain', danger: true,
+    onConfirm: () => {
+      p.brain = newBrain();
+      saveAll(); renderBrainModal();
+      showToast('Brain cleared', 'info');
+    }
+  });
 }
 
 // ============================================================
@@ -912,6 +1227,7 @@ function updateInputLockState() {
     wrapper.classList.add('locked');
     inputBox.placeholder = 'Sign in to chat with Nobody AI…';
   }
+  updateBrainBadge();
 }
 
 // ============================================================
@@ -928,11 +1244,17 @@ function confirmNewProject() {
   const input = document.getElementById('projectNameInput');
   const name = (input.value || '').trim();
   if (!name) { input.focus(); input.style.borderColor = 'var(--danger)'; setTimeout(() => input.style.borderColor = '', 1200); return; }
-  const project = { id: 'project_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7), name: name.slice(0, 60), history: [], display: [], pendingAttachments: [], createdAt: Date.now(), updatedAt: Date.now() };
+  const project = {
+    id: 'project_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+    name: name.slice(0, 60), history: [], display: [], pendingAttachments: [],
+    createdAt: Date.now(), updatedAt: Date.now(),
+    brain: newBrain(),
+  };
   allProjects.push(project);
   activeProjectId = project.id;
   saveAll(); closeNewProjectModal(); renderSidebar(); renderProject(); updateDownloadButton(); closeSidebar();
   document.getElementById('searchMsgBtn').style.display = 'flex';
+  updateBrainBadge();
   setTimeout(() => { inputBox.focus(); if (pendingDraft) { const d = pendingDraft; pendingDraft = null; inputBox.value = d; updateCharCount(); sendMessage(); } }, 100);
 }
 function switchProject(id) {
@@ -943,6 +1265,7 @@ function switchProject(id) {
   stopSpeech(); activeProjectId = id; closeSearchOverlay();
   saveAll(); renderSidebar(); renderProject(); updateDownloadButton(); closeSidebar(); renderAttachmentPreviews();
   document.getElementById('searchMsgBtn').style.display = 'flex';
+  updateBrainBadge();
   setTimeout(() => inputBox.focus(), 100);
 }
 function deleteProject(id) {
@@ -951,14 +1274,14 @@ function deleteProject(id) {
   openConfirm({ title: 'Delete project?', message: `"${p.name}" and all its messages will be permanently removed.`, okText: 'Delete', danger: true, onConfirm: () => {
     allProjects = allProjects.filter(x => x.id !== id);
     if (id === activeProjectId) { if (allProjects.length) { allProjects.sort((a,b)=>b.updatedAt-a.updatedAt); activeProjectId = allProjects[0].id; } else activeProjectId = null; renderProject(); }
-    saveAll(); renderSidebar(); updateDownloadButton();
+    saveAll(); renderSidebar(); updateDownloadButton(); updateBrainBadge();
     showToast('Project deleted', 'info');
   }});
 }
 function clearCurrentChat() {
   if (!ensureSignedIn()) return;
   const p = getActiveProject(); if (!p || !p.display || !p.display.length) return;
-  openConfirm({ title: 'Clear messages?', message: `All messages in "${p.name}" will be removed.`, okText: 'Clear', danger: true, onConfirm: () => {
+  openConfirm({ title: 'Clear messages?', message: `All messages in "${p.name}" will be removed. The project brain and learned facts will be kept.`, okText: 'Clear', danger: true, onConfirm: () => {
     stopSpeech(); p.history = []; p.display = []; p.pendingAttachments = []; p.updatedAt = Date.now();
     saveAll(); renderProject(); renderSidebar(); updateDownloadButton(); renderAttachmentPreviews();
     showToast('Conversation cleared', 'success');
@@ -998,10 +1321,15 @@ function exportConversation(format) {
   const p = getActiveProject(); if (!p) return;
   let content, filename, mimeType;
   if (format === 'json') {
-    content = JSON.stringify({ name: p.name, exportedAt: new Date().toISOString(), messages: p.display.map(m => ({ role: m.role, html: m.html, plain: htmlToPlainText(m.html) })) }, null, 2);
+    content = JSON.stringify({ name: p.name, exportedAt: new Date().toISOString(), brain: p.brain, messages: p.display.map(m => ({ role: m.role, html: m.html, plain: htmlToPlainText(m.html) })) }, null, 2);
     filename = sanitizeFilename(p.name) + '.json'; mimeType = 'application/json';
   } else {
-    let md = `# ${p.name}\n\n_Exported on ${new Date().toLocaleString()}_\n\n---\n\n`;
+    let md = `# ${p.name}\n\n_Exported on ${new Date().toLocaleString()}_\n\n`;
+    if (p.brain && p.brain.facts.length) {
+      md += `## Project Memory\n\n`;
+      for (const f of p.brain.facts) md += `- _(${f.category})_ ${f.text}\n`;
+      md += `\n---\n\n`;
+    }
     for (const m of p.display) md += `### ${m.role === 'user' ? '**You**' : '**Nobody AI**'}\n\n${htmlToMarkdown(m.html)}\n\n---\n\n`;
     content = md; filename = sanitizeFilename(p.name) + '.md'; mimeType = 'text/markdown';
   }
@@ -1021,15 +1349,17 @@ async function confirmImport() {
   try {
     const data = JSON.parse(await file.text());
     if (!data || !Array.isArray(data.messages)) throw new Error('Invalid file');
-    const project = { id: 'project_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7), name: (data.name || 'Imported').slice(0, 60), history: [], display: [], pendingAttachments: [], createdAt: Date.now(), updatedAt: Date.now() };
+    const project = { id: 'project_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7), name: (data.name || 'Imported').slice(0, 60), history: [], display: [], pendingAttachments: [], createdAt: Date.now(), updatedAt: Date.now(), brain: data.brain || newBrain() };
     for (const m of data.messages) {
       const html = m.html || escapeHtml(m.plain || '');
       project.display.push({ role: m.role, html });
       project.history.push({ role: m.role, content: m.plain || htmlToPlainText(html) });
     }
+    ensureBrain(project);
     allProjects.push(project); activeProjectId = project.id;
     saveAll(); renderSidebar(); renderProject(); updateDownloadButton(); closeImportModal(); closeSidebar();
     document.getElementById('searchMsgBtn').style.display = 'flex';
+    updateBrainBadge();
     showToast('Conversation imported', 'success');
   } catch (err) { alert('Import failed: ' + err.message); }
 }
@@ -1041,6 +1371,9 @@ function openSettings() {
   document.getElementById('systemPromptInput').value = userSettings.systemPrompt || '';
   document.getElementById('tempInput').value = userSettings.temperature;
   document.getElementById('maxTokensInput').value = userSettings.maxTokens;
+  const p = getActiveProject();
+  const brainToggle = document.getElementById('brainEnabledInput');
+  if (brainToggle) brainToggle.checked = p ? (p.brain ? p.brain.enabled : true) : true;
   const modelSelect = document.getElementById('modelSelect');
   modelSelect.innerHTML = '<option value="">Auto (router decides)</option>';
   const modelsByProvider = {
@@ -1061,6 +1394,9 @@ function saveSettings() {
   userSettings.maxTokens = parseInt(document.getElementById('maxTokensInput').value) || 8192;
   userSettings.model = document.getElementById('modelSelect').value;
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(userSettings));
+  const p = getActiveProject();
+  const brainToggle = document.getElementById('brainEnabledInput');
+  if (p && brainToggle) { ensureBrain(p); p.brain.enabled = brainToggle.checked; saveAll(); }
   closeSettings(); updateProviderHint();
   showToast('Settings saved', 'success');
 }
@@ -1082,11 +1418,15 @@ function renderSidebar() {
   if (!visible.length) { list.innerHTML = search ? '<div class="sidebar-empty">No projects match.</div>' : '<div class="sidebar-empty">No projects yet.<br>Click <strong>New project</strong>.</div>'; return; }
   const label = document.createElement('div'); label.className = 'sidebar-section-label'; label.textContent = search ? `Results (${visible.length})` : 'Projects'; list.appendChild(label);
   for (const p of visible) {
+    ensureBrain(p);
     const item = document.createElement('div');
     item.className = 'chat-item' + (p.id === activeProjectId ? ' active' : '');
     item.onclick = (e) => { if (!e.target.closest('.chat-item-action')) switchProject(p.id); };
     const codeCount = countCodeBlocksInProject(p);
-    const metaParts = [formatRelative(p.updatedAt)]; if (codeCount > 0) metaParts.push(`${codeCount} file${codeCount === 1 ? '' : 's'}`);
+    const brainFacts = p.brain.facts.length;
+    const metaParts = [formatRelative(p.updatedAt)];
+    if (brainFacts > 0) metaParts.push(`🧠 ${brainFacts}`);
+    if (codeCount > 0) metaParts.push(`${codeCount} file${codeCount === 1 ? '' : 's'}`);
     item.innerHTML = `<div class="chat-item-icon">📁</div><div class="chat-item-body"><div class="chat-item-title">${escapeHtml(p.name || 'Untitled')}</div><div class="chat-item-meta">${escapeHtml(metaParts.join(' · '))}</div></div><div class="chat-item-actions"><button class="chat-item-action" title="Rename"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button><button class="chat-item-action" title="Export"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></button><button class="chat-item-action danger" title="Delete"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`;
     const actions = item.querySelectorAll('.chat-item-action');
     actions[0].onclick = (e) => { e.stopPropagation(); openRenameModal(p.id); };
@@ -1237,7 +1577,6 @@ async function streamGemini({ cfg, contents, onChunk, onReasoning, signal }) {
     generationConfig: {
       temperature: userSettings.temperature,
       maxOutputTokens: userSettings.maxTokens,
-      // FIXED: Removed thinkingLevel because it's not supported by gemini-2.5-flash
       thinkingConfig: { includeThoughts: true },
     },
   };
@@ -1459,14 +1798,33 @@ async function sendMessage() {
   await runGeneration({ p, userText, attachments: atts, chain, combined });
 }
 
+/** Build the full system prompt including user override + project memory + memory protocol. */
+function buildSystemPrompt(project) {
+  const parts = [CODING_SYSTEM_PROMPT];
+  if (userSettings.systemPrompt) parts.push(userSettings.systemPrompt);
+  const mem = formatProjectMemory(project);
+  if (mem) parts.push(mem);
+  const p = project;
+  if (p && p.brain && p.brain.enabled) {
+    parts.push(MEMORY_INSTRUCTION);
+  } else {
+    parts.push('At the very end of every response, output <memory>[]</memory> (no new facts to remember).');
+  }
+  return parts.join('\n\n');
+}
+
 async function runGeneration({ p, userText, attachments, chain, combined }) {
   isGenerating = true;
   setGeneratingUI(true);
   currentAbortController = new AbortController();
 
+  ensureBrain(p);
   const historySnapshot = p.history.slice();
   const attempts = [];
   let success = false;
+
+  // Build the system prompt ONCE (with current memory snapshot)
+  const systemPrompt = buildSystemPrompt(p);
 
   for (let i = 0; i < chain.length; i++) {
     const providerId = chain[i];
@@ -1488,10 +1846,9 @@ async function runGeneration({ p, userText, attachments, chain, combined }) {
 
         const trimmed = trimHistory(historySnapshot, providerId, textBlock || userText);
         const contents = trimmed.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
-        if (userSettings.systemPrompt || CODING_SYSTEM_PROMPT) {
-          const sys = userSettings.systemPrompt ? `${CODING_SYSTEM_PROMPT}\n\n${userSettings.systemPrompt}` : CODING_SYSTEM_PROMPT;
-          if (contents.length) contents[0].parts.unshift({ text: sys + '\n\n' });
-          else contents.push({ role: 'user', parts: [{ text: sys }] });
+        if (systemPrompt) {
+          if (contents.length) contents[0].parts.unshift({ text: systemPrompt + '\n\n' });
+          else contents.push({ role: 'user', parts: [{ text: systemPrompt }] });
         }
         contents.push({ role: 'user', parts });
 
@@ -1525,10 +1882,7 @@ async function runGeneration({ p, userText, attachments, chain, combined }) {
 
         const trimmed = trimHistory(historySnapshot, providerId, userContent);
         const messages = [];
-        if (userSettings.systemPrompt || CODING_SYSTEM_PROMPT) {
-          const sys = userSettings.systemPrompt ? `${CODING_SYSTEM_PROMPT}\n\n${userSettings.systemPrompt}` : CODING_SYSTEM_PROMPT;
-          messages.push({ role: 'system', content: sys });
-        }
+        if (systemPrompt) messages.push({ role: 'system', content: systemPrompt });
         if (thinkingEnabled && !useNativeReasoning) messages.push({ role: 'system', content: THINKING_SYSTEM_PROMPT });
         for (const m of trimmed) messages.push(m);
         messages.push({ role: 'user', content: userContent });
@@ -1551,8 +1905,23 @@ async function runGeneration({ p, userText, attachments, chain, combined }) {
       usageStats.totalReasoningTokens += (result.reasoningTokens || 0);
       usageStats.totalRequests += 1;
 
-      let { thinking, answer } = extractThinking(result.text || '', result.reasoningContent);
-      let finalAnswer = answer || result.text || '';
+      // ── Extract memory block from the RAW response ──
+      const memExtracted = extractMemoryBlock(result.text || '');
+      let rawWithoutMemory = memExtracted.text;
+
+      // ── Merge new facts into the project brain ──
+      let factsLearned = 0;
+      if (memExtracted.facts.length && p.brain.enabled) {
+        factsLearned = addBrainFacts(p, memExtracted.facts, 'auto');
+        if (factsLearned > 0) {
+          usageStats.totalBrainFactsLearned = (usageStats.totalBrainFactsLearned || 0) + factsLearned;
+          p.brain.lastUpdated = Date.now();
+        }
+      }
+
+      // ── Now extract thinking from the memory-free text ──
+      let { thinking, answer } = extractThinking(rawWithoutMemory, result.reasoningContent);
+      let finalAnswer = answer || rawWithoutMemory || '';
 
       if (!finalAnswer && thinking) {
         finalAnswer = "*[Note: The model only generated internal reasoning and no final answer. Showing reasoning:]*\n\n" + thinking;
@@ -1574,19 +1943,27 @@ async function runGeneration({ p, userText, attachments, chain, combined }) {
           `<div class="debug-row ok"><span class="debug-label">Tokens</span> in ${result.inputTokens} / out ${result.outputTokens}${result.reasoningTokens ? ' (reasoning: ' + result.reasoningTokens + ')' : ''}</div>`,
         ];
         if (thinkingEnabled) rows.push(`<div class="debug-row info"><span class="debug-label">Thinking</span> ${thinking ? '✓ ' + thinking.length + ' chars' : '— none'}</div>`);
+        if (factsLearned > 0) rows.push(`<div class="debug-row info"><span class="debug-label">Brain</span> ✓ learned ${factsLearned} new fact${factsLearned === 1 ? '' : 's'} (total: ${p.brain.facts.length})</div>`);
         if (attempts.length) rows.push(`<div class="debug-row warn"><span class="debug-label">Fallbacks</span> ${attempts.filter(a => !a.provider.endsWith('_retry')).map(a => a.provider).join(', ')}</div>`);
         footer = renderDebugPanel('🔧 Debug — succeeded', rows.join(''));
       }
 
-      const finalHTML = thinkingHTML + renderMarkdown(finalAnswer) + footer;
+      // Show a subtle memory badge in the bubble if new facts were learned
+      const memoryBadge = factsLearned > 0 ? `<div class="memory-badge">🧠 Learned ${factsLearned} new fact${factsLearned === 1 ? '' : 's'} — remembered for next time</div>` : '';
+
+      const finalHTML = thinkingHTML + renderMarkdown(finalAnswer) + memoryBadge + footer;
       liveMsg.finalize(finalHTML);
 
       const displayEntry = { role: 'ai', html: finalHTML };
       p.history.push({ role: 'user', content: combined || '[attachment]' });
-      p.history.push({ role: 'assistant', content: result.text || finalAnswer });
+      p.history.push({ role: 'assistant', content: rawWithoutMemory || finalAnswer });
       p.display.push(displayEntry);
       p.updatedAt = Date.now();
-      saveAll(); renderSidebar(); updateDownloadButton();
+      saveAll(); renderSidebar(); updateDownloadButton(); updateBrainBadge();
+
+      if (factsLearned > 0) {
+        showToast(`🧠 Learned ${factsLearned} new fact${factsLearned === 1 ? '' : 's'}`, 'brain', 2600);
+      }
 
       if (autoPlayVoice) {
         const readBtn = liveMsg.element.querySelector('.read-btn');
@@ -1599,17 +1976,19 @@ async function runGeneration({ p, userText, attachments, chain, combined }) {
       if (err.name === 'AbortError') {
         const partial = liveMsg.getText();
         if (partial) {
-          const { thinking, answer } = extractThinking(partial, liveMsg.getReasoning());
-          const finalAnswer = answer || partial;
+          const memExtracted = extractMemoryBlock(partial);
+          if (memExtracted.facts.length && p.brain.enabled) addBrainFacts(p, memExtracted.facts, 'auto');
+          const { thinking, answer } = extractThinking(memExtracted.text, liveMsg.getReasoning());
+          const finalAnswer = answer || memExtracted.text;
           const thinkingHTML = thinkingEnabled && thinking ? renderThinkingPanel(thinking, elapsed, false, estimateTokens(thinking)) : '';
           const stoppedNote = `<div style="font-size:11px;color:var(--text-dark);margin-top:8px;font-style:italic;">⏹ Stopped by user</div>`;
           const finalHTML = thinkingHTML + renderMarkdown(finalAnswer) + stoppedNote;
           liveMsg.finalize(finalHTML);
           p.display.push({ role: 'ai', html: finalHTML });
           p.history.push({ role: 'user', content: combined || '[attachment]' });
-          p.history.push({ role: 'assistant', content: partial });
+          p.history.push({ role: 'assistant', content: memExtracted.text });
           p.updatedAt = Date.now();
-          saveAll(); renderSidebar(); updateDownloadButton();
+          saveAll(); renderSidebar(); updateDownloadButton(); updateBrainBadge();
         } else liveMsg.remove();
         success = true;
         break;
@@ -1671,7 +2050,9 @@ function createStreamingMessage() {
     if (throttle) return;
     throttle = setTimeout(() => {
       throttle = null;
-      liveContent.innerHTML = rawText ? renderMarkdownStreaming(rawText) : '';
+      // Strip the memory block from live display so users don't see raw JSON
+      const visible = rawText.replace(/<memory>[\s\S]*?<\/memory>/gi, '').trim();
+      liveContent.innerHTML = visible ? renderMarkdownStreaming(visible) : '';
       chatContainer.scrollTop = chatContainer.scrollHeight;
       updateScrollButton();
     }, 50);
@@ -1856,7 +2237,7 @@ function stopSpeech() {
 }
 function extractReadableText(bubbleEl) {
   const clone = bubbleEl.cloneNode(true);
-  clone.querySelectorAll('.code-block, .debug-panel, .thinking-panel, button, svg, .attachment-preview, .message-actions').forEach(el => el.remove());
+  clone.querySelectorAll('.code-block, .debug-panel, .thinking-panel, .memory-badge, button, svg, .attachment-preview, .message-actions').forEach(el => el.remove());
   return (clone.textContent || '').replace(/\s+/g, ' ').trim().replace(/\s*\|\s*/g, ', ').replace(/[•►▪]/g, ' ');
 }
 function speakMessage(btn, isAuto = false) {
@@ -1986,7 +2367,12 @@ async function downloadZip() {
   try {
     const zip = new JSZip();
     for (const f of currentZipFiles) zip.file(f.name, f.code);
-    zip.file('README.md', `# ${projectName}\n\nGenerated by Nobody AI.\n\n## Files\n\n${currentZipFiles.map(f => `- \`${f.name}\``).join('\n')}\n`);
+    let readme = `# ${projectName}\n\nGenerated by Nobody AI.\n\n## Files\n\n${currentZipFiles.map(f => `- \`${f.name}\``).join('\n')}\n`;
+    if (p && p.brain && p.brain.facts.length) {
+      readme += `\n## Project Memory\n\n`;
+      for (const f of p.brain.facts) readme += `- _(${f.category})_ ${f.text}\n`;
+    }
+    zip.file('README.md', readme);
     const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = `${projectName}.zip`;
@@ -2069,6 +2455,8 @@ function escapeHtml(str) {
 function decodeHtmlEntities(s) { if (!s) return s; const d = document.createElement('textarea'); d.innerHTML = s; return d.value; }
 function renderMarkdown(text) {
   if (!text) return '';
+  // Strip any stray memory blocks before rendering
+  text = text.replace(/<memory>[\s\S]*?<\/memory>/gi, '').trim();
   const parts = [];
   const re = /```([\w+#.-]*)[ \t]*\r?\n?([\s\S]*?)(?:```|$)/g;
   let lastIndex = 0, m;
@@ -2192,11 +2580,13 @@ function appendMessage(role, content, opts = {}) {
 }
 function renderProject() {
   chatContainer.innerHTML = '';
-  if (!currentUser) { headerTitle.textContent = 'Nobody AI'; renderSignInGate(); return; }
+  if (!currentUser) { headerTitle.textContent = 'Nobody AI'; renderSignInGate(); document.getElementById('brainBtn').style.display='none'; return; }
   const p = getActiveProject();
-  if (!p) { headerTitle.textContent = 'Nobody AI'; renderEmptyState(); document.getElementById('searchMsgBtn').style.display = 'none'; return; }
+  if (!p) { headerTitle.textContent = 'Nobody AI'; renderEmptyState(); document.getElementById('searchMsgBtn').style.display = 'none'; document.getElementById('brainBtn').style.display = 'none'; return; }
+  ensureBrain(p);
   headerTitle.textContent = p.name || 'Untitled project';
   document.getElementById('searchMsgBtn').style.display = 'flex';
+  updateBrainBadge();
   if (!p.display.length) { renderEmptyState(); return; }
   p.display.forEach((m, i) => {
     const div = document.createElement('div');
@@ -2208,12 +2598,19 @@ function renderProject() {
 }
 function renderEmptyState() {
   if (!currentUser) { renderSignInGate(); return; }
+  const p = getActiveProject();
   const configured = Object.keys(PROVIDERS).filter(keyIsValid);
   let debug = '';
+  let brainInfo = '';
+  if (p) {
+    ensureBrain(p);
+    if (p.brain.facts.length) {
+      brainInfo = `<div class="memory-badge" style="margin-top:14px">🧠 Brain has ${p.brain.facts.length} fact${p.brain.facts.length === 1 ? '' : 's'} about this project — click <strong>Brain</strong> in the header to view</div>`;
+    }
+  }
   if (DEBUG_MODE) {
-    const rows = Object.entries(PROVIDERS).map(([id, p]) => {
-      const modelLabel = p.model;
-      return `<div class="debug-row ok"><span class="debug-label">${escapeHtml(p.name)}</span> ✓ &nbsp; <span style="opacity:.7">${escapeHtml(modelLabel)}</span></div>`;
+    const rows = Object.entries(PROVIDERS).map(([id, p2]) => {
+      return `<div class="debug-row ok"><span class="debug-label">${escapeHtml(p2.name)}</span> ✓ &nbsp; <span style="opacity:.7">${escapeHtml(p2.model)}</span></div>`;
     }).join('');
     debug = renderDebugPanel(`🔧 Debug — ${configured.length} providers ready`, rows);
   }
@@ -2224,8 +2621,8 @@ function renderEmptyState() {
     'Write unit tests for this Express API endpoint',
     'Explain the time complexity of this algorithm',
   ];
-  const promptHTML = prompts.map(p => `<button class="suggested-prompt" onclick="useSuggestedPrompt('${escapeHtml(p).replace(/'/g, "\\'")}')">${escapeHtml(p)}</button>`).join('');
-  const html = `<strong>Welcome to Nobody AI — Senior Coding Assistant.</strong><p style="margin-top:10px;">I'm tuned for software engineering: production-ready code, clean architecture, and expert debugging. Start a new project to begin.</p><p style="margin-top:10px;">What I can do:</p><ul style="margin-top:6px;"><li>Write production-ready code in 30+ languages</li><li>Debug complex stack traces and errors</li><li>Refactor legacy code into clean architecture</li><li>Preview HTML/CSS/JS/SVG live</li><li>Download your entire project as a ZIP</li><li>Explain algorithmic time/space complexity</li></ul><div class="suggested-prompts">${promptHTML}</div>${debug}`;
+  const promptHTML = prompts.map(p2 => `<button class="suggested-prompt" onclick="useSuggestedPrompt('${escapeHtml(p2).replace(/'/g, "\\'")}')">${escapeHtml(p2)}</button>`).join('');
+  const html = `<strong>Welcome to Nobody AI — Senior Coding Assistant.</strong><p style="margin-top:10px;">I'm tuned for software engineering: production-ready code, clean architecture, and expert debugging. I have a <strong>persistent memory</strong> for each project — tell me your stack once, and I'll remember it forever.</p><p style="margin-top:10px;">What I can do:</p><ul style="margin-top:6px;"><li>Write production-ready code in 30+ languages</li><li>Debug complex stack traces and errors</li><li>Refactor legacy code into clean architecture</li><li>Preview HTML/CSS/JS/SVG live</li><li>Download your entire project as a ZIP</li><li><strong>Remember</strong> your stack, conventions & decisions</li></ul><div class="suggested-prompts">${promptHTML}</div>${brainInfo}${debug}`;
   const div = document.createElement('div');
   div.className = 'message ai empty-state';
   div.innerHTML = `<div class="avatar ai">N</div><div class="message-content"><div class="bubble">${html}</div></div>`;
@@ -2243,10 +2640,10 @@ function renderSignInGate() {
   div.innerHTML = `
     <div class="signin-gate-icon">N</div>
     <h2>Sign in to Nobody AI</h2>
-    <p>A senior-level coding assistant. Create an account or sign in to start writing, debugging, and refactoring production-grade code.</p>
+    <p>A senior-level coding assistant with persistent project memory. Create an account or sign in to start writing, debugging, and refactoring production-grade code.</p>
     <div class="signin-gate-features">
       <span>Cloud-synced projects</span>
-      <span>Multi-language support</span>
+      <span>Persistent brain per project</span>
       <span>Live code preview</span>
       <span>Deep reasoning mode</span>
     </div>
@@ -2295,12 +2692,12 @@ function htmlToPlainText(html) {
     const code = cb.querySelector('pre code')?.textContent || ''; const lang = cb.dataset.lang || 'code';
     const w = document.createElement('div'); w.textContent = `\n\`\`\`${lang}\n${code}\n\`\`\`\n`; cb.replaceWith(w);
   });
-  d.querySelectorAll('.thinking-panel, .debug-panel, .message-actions').forEach(el => el.remove());
+  d.querySelectorAll('.thinking-panel, .debug-panel, .memory-badge, .message-actions').forEach(el => el.remove());
   return (d.textContent || '').trim();
 }
 function htmlToMarkdown(html) {
   const d = document.createElement('div'); d.innerHTML = html;
-  d.querySelectorAll('.debug-panel, .message-actions').forEach(el => el.remove());
+  d.querySelectorAll('.debug-panel, .memory-badge, .message-actions').forEach(el => el.remove());
   d.querySelectorAll('.thinking-panel').forEach(tp => {
     const body = tp.querySelector('.thinking-body')?.textContent || '';
     const w = document.createElement('div'); w.textContent = `\n> _Reasoning:_ ${body}\n`; tp.replaceWith(w);
@@ -2324,6 +2721,7 @@ function htmlToMarkdown(html) {
 const COMMANDS = [
   { id: 'new-project', label: 'New project', hint: '⌘N', run: () => openNewProjectModal() },
   { id: 'settings', label: 'Open settings', hint: '⌘,', run: () => openSettings() },
+  { id: 'brain', label: 'Open project brain', hint: '⌘B', run: () => openBrainModal() },
   { id: 'toggle-theme', label: 'Toggle theme', run: () => toggleTheme() },
   { id: 'toggle-thinking', label: 'Toggle deep thinking', run: () => toggleThinking() },
   { id: 'toggle-voice', label: 'Toggle auto voice', run: () => toggleAutoVoice() },
@@ -2332,6 +2730,7 @@ const COMMANDS = [
   { id: 'export-json', label: 'Export as JSON', run: () => { closePalette(); exportConversation('json'); } },
   { id: 'import', label: 'Import conversation', run: () => openImportModal() },
   { id: 'clear', label: 'Clear current messages', run: () => clearCurrentChat() },
+  { id: 'clear-brain', label: 'Clear project brain', run: () => clearBrain() },
   { id: 'download-zip', label: 'Download project as ZIP', run: () => openProjectZipModal() },
   { id: 'auth', label: 'Sign in / Sign out', run: () => { closePalette(); handleAuthClick(); } },
 ];
@@ -2357,10 +2756,12 @@ document.addEventListener('keydown', (e) => {
   const mod = isMac ? e.metaKey : e.ctrlKey;
   if (mod && e.key.toLowerCase() === 'k') { e.preventDefault(); if (document.getElementById('paletteOverlay').classList.contains('active')) closePalette(); else openPalette(); return; }
   if (mod && e.key.toLowerCase() === 'n') { e.preventDefault(); openNewProjectModal(); return; }
+  if (mod && e.key.toLowerCase() === 'b') { e.preventDefault(); openBrainModal(); return; }
   if (mod && e.key.toLowerCase() === 'f') { e.preventDefault(); if (getActiveProject()) openSearchOverlay(); return; }
   if (mod && e.key === ',') { e.preventDefault(); openSettings(); return; }
   if (mod && e.key === 'Enter') { if (document.activeElement === inputBox) { e.preventDefault(); sendMessage(); } return; }
   if (e.key === 'Escape') {
+    if (document.getElementById('brainModal').classList.contains('active')) { closeBrainModal(); return; }
     if (document.getElementById('searchOverlay').classList.contains('active')) { closeSearchOverlay(); return; }
     ['previewModal','zipModal','newProjectModal','renameModal','exportModal','importModal','settingsModal','confirmModal','editModal','topupModal','paletteOverlay','authModal'].forEach(id => {
       const el = document.getElementById(id); if (el) el.classList.remove('active');
@@ -2400,6 +2801,7 @@ function updateUserUI(user) {
     btn.textContent = 'Sign out'; btn.classList.remove('signin');
   }
   updateInputLockState();
+  updateBrainBadge();
 }
 async function handleAuthClick() {
   if (!window.fb) { alert('Firebase is still loading… try again in a moment.'); return; }
@@ -2509,6 +2911,7 @@ async function bootstrapAfterFirebase() {
     else renderProject();
     updateDownloadButton();
     updateProviderHint();
+    updateBrainBadge();
   });
 }
 
@@ -2560,6 +2963,9 @@ function init() {
     if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); submitAuth(); } });
   });
 
+  const brainInput = document.getElementById('brainNewFact');
+  if (brainInput) brainInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addBrainFactFromInput(); } });
+
   updateCreditsBadge();
   updateVoiceToggleUI();
   updateThinkingToggleUI();
@@ -2573,6 +2979,7 @@ function init() {
   renderProject();
   updateDownloadButton();
   updateProviderHint();
+  updateBrainBadge();
 
   if (window.fb) bootstrapAfterFirebase();
   else window.addEventListener('fb-ready', bootstrapAfterFirebase, { once: true });
@@ -2580,6 +2987,7 @@ function init() {
   if (DEBUG_MODE) {
     console.log('[Nobody AI] Providers:', Object.entries(PROVIDERS).map(([id, p]) => `${id}=${p.model}`).join(', '));
     console.log('[Nobody AI] Usage stats:', usageStats);
+    console.log('[Nobody AI] Brain: enabled with ' + BRAIN_MAX_FACTS + ' max facts per project');
   }
 }
 
