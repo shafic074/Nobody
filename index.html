@@ -9,7 +9,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <link rel="preconnect" href="https://www.gstatic.com">
 <link rel="preconnect" href="https://firestore.googleapis.com">
-<title>Nobody AI</title>
+<title>Nobody AI — Senior Coding Assistant</title>
 <style>
   :root {
     --bg-body:#0A0D15;--bg-sidebar:#080B12;--bg-surface:#141928;--bg-surface-2:#1A2032;
@@ -421,7 +421,7 @@
     </button>
     <div class="input-area" id="inputArea">
       <div class="input-wrapper">
-        <textarea class="input-box" id="inputBox" placeholder="Ask Nobody AI anything… (⌘K for commands)" rows="1"></textarea>
+        <textarea class="input-box" id="inputBox" placeholder="Ask Nobody AI to build, debug, or refactor code… (⌘K for commands)" rows="1"></textarea>
         <div class="input-actions">
           <button class="icon-btn mic" id="micBtn" onclick="toggleVoiceInput()" title="Voice input">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
@@ -519,10 +519,10 @@
 <div class="modal-overlay" id="settingsModal"><div class="modal modal-md" tabindex="-1">
   <h2><div class="modal-icon primary"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></div>Settings</h2>
   <div class="modal-scroll">
-    <div class="field-group"><label class="field-label">System prompt (applies to every reply)</label><textarea class="textarea-field" id="systemPromptInput" placeholder="e.g., Always respond in French. You are a Python expert."></textarea></div>
+    <div class="field-group"><label class="field-label">System prompt (applies to every reply)</label><textarea class="textarea-field" id="systemPromptInput" placeholder="e.g., You are a senior Python engineer. Always write type hints and docstrings."></textarea></div>
     <div class="field-group"><label class="field-label">Preferred model</label><select class="input-field" id="modelSelect"><option value="">Auto (router decides)</option></select></div>
     <div class="field-row">
-      <div class="field-group"><label class="field-label">Temperature</label><input type="number" class="input-field" id="tempInput" min="0" max="2" step="0.1" value="0.7"></div>
+      <div class="field-group"><label class="field-label">Temperature</label><input type="number" class="input-field" id="tempInput" min="0" max="2" step="0.1" value="0.2"></div>
       <div class="field-group"><label class="field-label">Max tokens</label><input type="number" class="input-field" id="maxTokensInput" min="256" max="32000" step="256" value="4096"></div>
     </div>
   </div>
@@ -624,10 +624,7 @@ window.dispatchEvent(new Event('fb-ready'));
 
 <script>
 // ══════════════════════════════════════════════════════════════
-//  🔒 API KEYS ARE NOW SECURELY STORED ON THE BACKEND
-// ══════════════════════════════════════════════════════════════
-//  The frontend no longer holds any API keys. It routes all
-//  requests through /api/proxy, which injects the keys server-side.
+//  🔒 API KEYS ARE NOW SECURELY STORED ON CLOUDFLARE WORKERS
 // ══════════════════════════════════════════════════════════════
 
 const FREE_TRIAL_CREDITS = 0.05;
@@ -650,29 +647,33 @@ if (window.pdfjsLib) {
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 }
 
-const THINKING_SYSTEM_PROMPT = `You are a thoughtful, careful assistant. Before you give your final answer, think through the problem inside <thinking>...</thinking> tags.
+// ── Professional Coding System Prompt ──
+const CODING_SYSTEM_PROMPT = `You are Nobody AI, a senior-level software engineer and coding assistant. 
+Your goal is to write clean, production-ready code and provide expert-level technical guidance.
 
 Rules:
-- Your reasoning goes BETWEEN <thinking> and </thinking>.
-- After the closing </thinking> tag, give your clear, final answer.
-- The thinking section is your genuine reasoning.
-- NEVER put the actual answer inside <thinking>.`;
+- Always prioritize correctness, security, and maintainability.
+- Write modern, idiomatic code for the requested language.
+- Include brief, high-value comments explaining *why*, not *what*.
+- Anticipate edge cases (null/undefined, network failures, empty arrays).
+- If the user's request is ambiguous, state your assumptions and proceed.
+- When providing code, use fenced markdown code blocks with the correct language tag.
+- Do not include unnecessary preamble or apologies. Get straight to the solution.`;
 
-// ── Proxy URL for all providers ──
 const PROXY_URL = "https://nobody-ai-proxy.shafick074.workers.dev";
 
 const PROVIDERS = {
   deepseek: {
-    name: 'DeepSeek V4.1 Flash',
-    url: `${PROXY_URL}?provider=deepseek`,
+    name: 'DeepSeek V4.1 Flash (NVIDIA)',
+    url: PROXY_URL + '?provider=deepseek',
     model: 'deepseek-ai/deepseek-v4.1-flash',
     supportsVision: true,
     format: 'openai',
     nativeReasoning: true,
   },
   deepseekPro: {
-    name: 'DeepSeek V4 Pro',
-    url: `${PROXY_URL}?provider=deepseekPro`,
+    name: 'DeepSeek V4 Pro (NVIDIA)',
+    url: PROXY_URL + '?provider=deepseekPro',
     model: 'deepseek-ai/deepseek-v4-pro',
     supportsVision: false,
     format: 'openai',
@@ -680,21 +681,21 @@ const PROVIDERS = {
   },
   groq: {
     name: 'Groq',
-    url: `${PROXY_URL}?provider=groq`,
+    url: PROXY_URL + '?provider=groq',
     model: 'llama-3.3-70b-versatile',
     supportsVision: false,
     format: 'openai',
   },
   openrouter: {
     name: 'OpenRouter',
-    url: `${PROXY_URL}?provider=openrouter`,
-    model: 'nvidia/nemotron-3.5-lightning:free',
+    url: PROXY_URL + '?provider=openrouter',
+    model: 'qwen/qwen3-coder:free',
     supportsVision: false,
     format: 'openai',
   },
   gemini: {
     name: 'Gemini',
-    url: `${PROXY_URL}?provider=gemini`,
+    url: PROXY_URL + '?provider=gemini',
     model: 'gemini-3.6-flash',
     supportsVision: true,
     format: 'gemini',
@@ -703,11 +704,7 @@ const PROVIDERS = {
 
 const PROVIDER_TOKEN_BUDGETS = { groq: 6000, gemini: 200000, deepseek: 60000, deepseekPro: 120000, openrouter: 20000, default: 12000 };
 
-// In the backend-proxy model, the frontend doesn't know if a key is configured.
-// We assume all providers are available, and if the proxy returns a 500,
-// the fallback logic will handle it.
 function keyIsValid(id) { return !!PROVIDERS[id]; }
-
 function estimateTokens(text) { if (!text) return 0; if (typeof text !== 'string') text = JSON.stringify(text); return Math.ceil(text.length / 4); }
 
 function trimHistory(history, providerId, userContent) {
@@ -734,14 +731,31 @@ function isCodeFile(name) {
 }
 function detectCodeIntent(text) { const lower = (text || '').toLowerCase(); let score = 0; for (const kw of CODE_KEYWORDS) if (lower.includes(kw)) score += 1; return score; }
 
+// ── PROFESSIONAL ROUTER: DeepSeek exclusively for coding ──
 function selectProviderChain(userText, attachments) {
   const available = Object.keys(PROVIDERS).filter(keyIsValid);
   if (!available.length) return [];
+  
   const hasImage = attachments.some(a => a.type === 'image');
   const hasPdf = attachments.some(a => a.type === 'pdf');
   const hasCodeFile = attachments.some(a => a.type === 'text' && isCodeFile(a.name));
   const textLen = (userText || '').length;
   const codeScore = detectCodeIntent(userText);
+  const isCodingTask = codeScore >= 1 || hasCodeFile;
+
+  // ── RULE: ONLY DeepSeek for coding tasks ──
+  if (isCodingTask) {
+    const deepseekAvailable = ['deepseekPro', 'deepseek'].filter(id => available.includes(id));
+    if (deepseekAvailable.length > 0) {
+      // If there's an image, we must use DeepSeek V4.1 Flash (deepseek) because Pro is text-only
+      if (hasImage) {
+        return ['deepseek', 'deepseekPro'].filter(id => deepseekAvailable.includes(id));
+      }
+      // Otherwise, prioritize Pro for the highest quality code, then fallback to Flash
+      return deepseekAvailable;
+    }
+    // If no DeepSeek key is configured, fall through to general logic (emergency fallback)
+  }
 
   if (hasImage) return ['gemini', 'deepseek', 'openrouter'].filter(id => available.includes(id));
 
@@ -750,26 +764,28 @@ function selectProviderChain(userText, attachments) {
 
   if (hasPdf || textLen > 4000) { add('gemini', 10); add('deepseekPro', 8); add('deepseek', 5); }
   if (codeScore >= 1 || hasCodeFile) {
-    add('deepseekPro', 6 + Math.min(codeScore, 4));
-    add('deepseek', 5 + Math.min(codeScore, 3));
-    add('groq', 3);
+    add('deepseekPro', 15 + Math.min(codeScore, 5));
+    add('deepseek', 12 + Math.min(codeScore, 3));
+    add('groq', 8);
+    add('openrouter', 6);
   }
   if (!hasPdf && !hasCodeFile && codeScore === 0 && textLen > 0 && textLen < 200) {
+    add('groq', 10);
     add('deepseek', 8);
-    add('groq', 7);
-    add('deepseekPro', 3);
+    add('gemini', 5);
   }
   if (!hasPdf && !hasCodeFile && codeScore === 0 && textLen >= 200 && textLen <= 4000) {
-    add('deepseek', 6);
+    add('deepseek', 8);
+    add('groq', 6);
     add('deepseekPro', 5);
-    add('groq', 4);
+    add('gemini', 4);
   }
   if (!Object.keys(scores).length) {
-    add('deepseek', 5); add('deepseekPro', 4); add('groq', 4); add('gemini', 3); add('openrouter', 2);
+    add('deepseek', 5); add('groq', 4); add('deepseekPro', 3); add('gemini', 2); add('openrouter', 1);
   }
 
   const ranked = Object.entries(scores).sort((a, b) => b[1] - a[1]).map(([id]) => id);
-  const fallbackOrder = ['deepseek', 'deepseekPro', 'groq', 'gemini', 'openrouter'];
+  const fallbackOrder = ['deepseekPro', 'deepseek', 'groq', 'openrouter', 'gemini'];
   for (const id of fallbackOrder) if (available.includes(id) && !ranked.includes(id)) ranked.push(id);
   return ranked;
 }
@@ -782,7 +798,7 @@ let activeProjectId = null;
 let credits = FREE_TRIAL_CREDITS;
 let currentSpeakingBtn = null;
 let autoPlayVoice = true;
-let thinkingEnabled = true;
+let thinkingEnabled = false;
 let speechUnlocked = false;
 let currentPreviewHTML = '';
 let currentZipFiles = [];
@@ -801,7 +817,7 @@ let cloudSyncEnabled = false;
 
 let currentAuthMode = 'signin';
 
-let userSettings = { systemPrompt: '', model: '', temperature: 0.7, maxTokens: 4096 };
+let userSettings = { systemPrompt: '', model: '', temperature: 0.2, maxTokens: 4096 };
 let requestTimestamps = [];
 
 try {
@@ -910,7 +926,7 @@ function updateInputLockState() {
   if (!wrapper) return;
   if (currentUser) {
     wrapper.classList.remove('locked');
-    inputBox.placeholder = 'Ask Nobody AI anything… (⌘K for commands)';
+    inputBox.placeholder = 'Ask Nobody AI to build, debug, or refactor code… (⌘K for commands)';
   } else {
     wrapper.classList.add('locked');
     inputBox.placeholder = 'Sign in to chat with Nobody AI…';
@@ -1043,7 +1059,7 @@ function openSettings() {
     deepseek:    ['deepseek-ai/deepseek-v4.1-flash'],
     deepseekPro: ['deepseek-ai/deepseek-v4-pro'],
     groq:        ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'],
-    openrouter:  ['nvidia/nemotron-3.5-lightning:free', 'nvidia/nemotron-3-ultra-550b-a55b:free'],
+    openrouter:  ['qwen/qwen3-coder:free', 'nvidia/nemotron-3.5-lightning:free'],
     gemini:      ['gemini-3.6-flash', 'gemini-2.5-flash-lite'],
   };
   for (const [pid, models] of Object.entries(modelsByProvider)) {
@@ -1056,7 +1072,7 @@ function openSettings() {
 function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
 function saveSettings() {
   userSettings.systemPrompt = document.getElementById('systemPromptInput').value;
-  userSettings.temperature = parseFloat(document.getElementById('tempInput').value) || 0.7;
+  userSettings.temperature = parseFloat(document.getElementById('tempInput').value) || 0.2;
   userSettings.maxTokens = parseInt(document.getElementById('maxTokensInput').value) || 4096;
   userSettings.model = document.getElementById('modelSelect').value;
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(userSettings));
@@ -1135,10 +1151,8 @@ function updateCreditsBadge() {
 }
 
 // ============================================================
-//  Streaming API calls (All routed through /api/proxy)
+//  Streaming API calls
 // ============================================================
-
-// Streams from OpenAI-compatible endpoints (NVIDIA NIM, Groq, OpenRouter)
 async function streamOpenAI({ cfg, providerId, messages, model, onChunk, onReasoning, signal }) {
   const headers = { 'Content-Type': 'application/json' };
   
@@ -1150,7 +1164,6 @@ async function streamOpenAI({ cfg, providerId, messages, model, onChunk, onReaso
     stream: true,
   };
 
-  // NVIDIA NIM specific reasoning params
   if (cfg.nvidiaNim) {
     if (model.includes('deepseek-v4-pro')) {
       body.reasoning_effort = 'high';
@@ -1193,7 +1206,6 @@ async function streamOpenAI({ cfg, providerId, messages, model, onChunk, onReaso
   return { text: fullText, reasoningContent: fullReasoning, inputTokens, outputTokens, model };
 }
 
-// Streams from Gemini (routed through proxy)
 async function streamGemini({ cfg, contents, onChunk, onReasoning, signal }) {
   const headers = { 'Content-Type': 'application/json' };
   const body = {
@@ -1448,9 +1460,10 @@ async function runGeneration({ p, userText, attachments, chain, combined }) {
 
         const trimmed = trimHistory(historySnapshot, providerId, textBlock || userText);
         const contents = trimmed.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
-        if (userSettings.systemPrompt) {
-          if (contents.length) contents[0].parts.unshift({ text: userSettings.systemPrompt + '\n\n' });
-          else contents.push({ role: 'user', parts: [{ text: userSettings.systemPrompt }] });
+        if (userSettings.systemPrompt || CODING_SYSTEM_PROMPT) {
+          const sys = userSettings.systemPrompt ? `${CODING_SYSTEM_PROMPT}\n\n${userSettings.systemPrompt}` : CODING_SYSTEM_PROMPT;
+          if (contents.length) contents[0].parts.unshift({ text: sys + '\n\n' });
+          else contents.push({ role: 'user', parts: [{ text: sys }] });
         }
         contents.push({ role: 'user', parts });
 
@@ -1484,7 +1497,10 @@ async function runGeneration({ p, userText, attachments, chain, combined }) {
 
         const trimmed = trimHistory(historySnapshot, providerId, userContent);
         const messages = [];
-        if (userSettings.systemPrompt) messages.push({ role: 'system', content: userSettings.systemPrompt });
+        if (userSettings.systemPrompt || CODING_SYSTEM_PROMPT) {
+          const sys = userSettings.systemPrompt ? `${CODING_SYSTEM_PROMPT}\n\n${userSettings.systemPrompt}` : CODING_SYSTEM_PROMPT;
+          messages.push({ role: 'system', content: sys });
+        }
         if (thinkingEnabled && !useNativeReasoning) messages.push({ role: 'system', content: THINKING_SYSTEM_PROMPT });
         for (const m of trimmed) messages.push(m);
         messages.push({ role: 'user', content: userContent });
@@ -2139,7 +2155,7 @@ function renderEmptyState() {
     }).join('');
     debug = renderDebugPanel(`🔧 Debug — ${configured.length} providers ready (keys managed by backend)`, rows);
   }
-  const html = `<strong>Hi there! I'm Nobody AI.</strong><p style="margin-top:10px;">Click <strong>New project</strong> in the sidebar to start.</p><p style="margin-top:10px;">Features:</p><ul style="margin-top:6px;"><li>Streaming replies</li><li>🧠 Deep thinking</li><li>Preview HTML/CSS/JS/SVG</li><li>Download project as ZIP</li><li>Export/Import conversations</li><li>Voice input &amp; output</li><li>⌘K command palette</li><li>☁️ Cloud sync via Firebase</li></ul>${debug}`;
+  const html = `<strong>Welcome to Nobody AI — Senior Coding Assistant.</strong><p style="margin-top:10px;">I'm tuned for software engineering: production-ready code, clean architecture, and expert debugging. Start a new project to begin.</p><p style="margin-top:10px;">What I can do:</p><ul style="margin-top:6px;"><li>Write production-ready code in 30+ languages</li><li>Debug complex stack traces and errors</li><li>Refactor legacy code into clean architecture</li><li>Preview HTML/CSS/JS/SVG live</li><li>Download your entire project as a ZIP</li><li>Explain algorithmic time/space complexity</li></ul>${debug}`;
   const div = document.createElement('div');
   div.className = 'message ai empty-state';
   div.innerHTML = `<div class="avatar ai">N</div><div class="message-content"><div class="bubble">${html}</div></div>`;
@@ -2152,12 +2168,12 @@ function renderSignInGate() {
   div.innerHTML = `
     <div class="signin-gate-icon">N</div>
     <h2>Sign in to Nobody AI</h2>
-    <p>Create a free account or sign in to start chatting. Your projects and conversations sync securely across all your devices.</p>
+    <p>A senior-level coding assistant. Create an account or sign in to start writing, debugging, and refactoring production-grade code.</p>
     <div class="signin-gate-features">
       <span>Cloud-synced projects</span>
-      <span>Unlimited conversations</span>
-      <span>Code preview &amp; ZIP export</span>
-      <span>Deep thinking mode</span>
+      <span>Multi-language support</span>
+      <span>Live code preview</span>
+      <span>Deep reasoning mode</span>
     </div>
     <div class="signin-gate-actions">
       <button class="signin-gate-btn" onclick="openAuthModal('signup')">
