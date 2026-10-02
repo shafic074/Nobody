@@ -662,9 +662,22 @@ Rules:
 
 const PROXY_URL = "https://nobody-ai-proxy.shafick074.workers.dev";
 
-// ── BUG FIX: Corrected NVIDIA model IDs + added Groq fallback for coding ──
+// ── UPDATED: Current free models for code generation (Oct 2026) ──
+// Sources: OpenRouter free models, Groq free tier, NVIDIA NIM free endpoints
 const PROVIDERS = {
-  // Primary NVIDIA coding model (verified free tier, Sept 2026)
+  // ── PRIMARY: Space Bunny Alpha (anonymous stealth model, free) ──
+  // 1M context, native multimodal, strong coding ability.
+  // NOTE: This is an "Alpha" preview; model ID may change.
+  spaceBunny: {
+    name: 'Space Bunny Alpha (OpenRouter)',
+    url: PROXY_URL + '?provider=openrouter',
+    model: 'stealth/space-bunny-alpha',
+    supportsVision: true,
+    format: 'openai',
+    nativeReasoning: true,
+  },
+  // ── DEEPSEEK V4 FLASH (NVIDIA NIM) ──
+  // 284B MoE, 13B active, 1M ctx, fast coding & agent tasks.
   deepseek: {
     name: 'DeepSeek V4 Flash (NVIDIA)',
     url: PROXY_URL + '?provider=deepseek',
@@ -673,7 +686,8 @@ const PROVIDERS = {
     format: 'openai',
     nativeReasoning: true,
   },
-  // Advanced reasoning model (verified free tier)
+  // ── DEEPSEEK V4 PRO (NVIDIA NIM) ──
+  // 1.6T MoE, 49B active, 1M ctx, Think/Non-Think hybrid.
   deepseekPro: {
     name: 'DeepSeek V4 Pro (NVIDIA)',
     url: PROXY_URL + '?provider=deepseekPro',
@@ -682,25 +696,60 @@ const PROVIDERS = {
     format: 'openai',
     nativeReasoning: true,
   },
-  // Fast fallback — now reachable for coding tasks
+  // ── QWEN3 CODER 480B (NVIDIA NIM) ──
+  // Dedicated coding model, 35B active, 256K ctx.
+  qwenCoder: {
+    name: 'Qwen3 Coder 480B (NVIDIA)',
+    url: PROXY_URL + '?provider=qwenCoder',
+    model: 'qwen/qwen3-coder-480b-a35b-instruct',
+    supportsVision: false,
+    format: 'openai',
+    nativeReasoning: false,
+  },
+  // ── GROQ: Kimi K2 Instruct ──
+  // Exceptional coding, math, reasoning. Ultra-fast LPU inference.
   groq: {
-    name: 'Groq',
+    name: 'Kimi K2 (Groq)',
     url: PROXY_URL + '?provider=groq',
-    model: 'qwen/qwen3-32b',
+    model: 'moonshotai/kimi-k2-instruct',
     supportsVision: false,
     format: 'openai',
+    nativeReasoning: false,
   },
-  // Free coding backup via OpenRouter
+  // ── GROQ: Qwen 3.6 27B ──
+  // State-of-the-art reasoning & agentic coding, 131K ctx.
+  groqQwen: {
+    name: 'Qwen 3.6 27B (Groq)',
+    url: PROXY_URL + '?provider=groq',
+    model: 'qwen/qwen3.6-27b',
+    supportsVision: false,
+    format: 'openai',
+    nativeReasoning: false,
+  },
+  // ── OPENROUTER: Nemotron 3 Ultra ──
+  // 550B MoE, 55B active, 1M ctx. Deep reasoning & long-context planning.
   openrouter: {
-    name: 'OpenRouter',
+    name: 'Nemotron 3 Ultra (OpenRouter)',
     url: PROXY_URL + '?provider=openrouter',
-    model: 'qwen/qwen3-coder:free',
+    model: 'nvidia/nemotron-3-ultra-550b-a55b:free',
     supportsVision: false,
     format: 'openai',
+    nativeReasoning: false,
   },
-  // Vision + multimodal
+  // ── OPENROUTER: Laguna S 2.1 ──
+  // Best free model for coding agents.
+  openrouterAgent: {
+    name: 'Laguna S 2.1 (OpenRouter)',
+    url: PROXY_URL + '?provider=openrouter',
+    model: 'poolside/laguna-s-2.1:free',
+    supportsVision: false,
+    format: 'openai',
+    nativeReasoning: false,
+  },
+  // ── GEMINI 3.8 FLASH ──
+  // Vision + multimodal, free tier available.
   gemini: {
-    name: 'Gemini',
+    name: 'Gemini 3.8 Flash',
     url: PROXY_URL + '?provider=gemini',
     model: 'gemini-3.8-flash',
     supportsVision: true,
@@ -708,7 +757,18 @@ const PROVIDERS = {
   },
 };
 
-const PROVIDER_TOKEN_BUDGETS = { groq: 6000, gemini: 200000, deepseek: 1000000, deepseekPro: 1000000, openrouter: 20000, default: 12000 };
+const PROVIDER_TOKEN_BUDGETS = { 
+  groq: 6000, 
+  groqQwen: 6000,
+  gemini: 200000, 
+  deepseek: 1000000, 
+  deepseekPro: 1000000, 
+  qwenCoder: 256000,
+  spaceBunny: 1000000,
+  openrouter: 1000000,
+  openrouterAgent: 200000,
+  default: 12000 
+};
 
 function keyIsValid(id) { return !!PROVIDERS[id]; }
 function estimateTokens(text) { if (!text) return 0; if (typeof text !== 'string') text = JSON.stringify(text); return Math.ceil(text.length / 4); }
@@ -737,7 +797,7 @@ function isCodeFile(name) {
 }
 function detectCodeIntent(text) { const lower = (text || '').toLowerCase(); let score = 0; for (const kw of CODE_KEYWORDS) if (lower.includes(kw)) score += 1; return score; }
 
-// ── BUG FIX: Router now falls through to Groq/OpenRouter if NVIDIA fails ──
+// ── UPDATED: Router with new provider chain ──
 function selectProviderChain(userText, attachments) {
   const available = Object.keys(PROVIDERS).filter(keyIsValid);
   if (!available.length) return [];
@@ -749,11 +809,10 @@ function selectProviderChain(userText, attachments) {
   const codeScore = detectCodeIntent(userText);
   const isCodingTask = codeScore >= 1 || hasCodeFile;
 
-  // ── RULE: Prefer NVIDIA for coding, but allow Groq/OpenRouter as fallbacks ──
+  // ── RULE: Prefer coding-optimised models, with fallbacks ──
   if (isCodingTask) {
-    const codingChain = ['deepseek', 'deepseekPro', 'groq', 'openrouter'].filter(id => available.includes(id));
+    const codingChain = ['spaceBunny', 'deepseek', 'deepseekPro', 'qwenCoder', 'groq', 'groqQwen', 'openrouter', 'openrouterAgent'].filter(id => available.includes(id));
     if (codingChain.length > 0) {
-      // If there's an image, we must include a vision-capable model first
       if (hasImage) {
         return ['gemini', ...codingChain].filter((id, i, arr) => arr.indexOf(id) === i);
       }
@@ -761,20 +820,23 @@ function selectProviderChain(userText, attachments) {
     }
   }
 
-  if (hasImage) return ['gemini', 'deepseek', 'openrouter'].filter(id => available.includes(id));
+  if (hasImage) return ['gemini', 'spaceBunny', 'deepseek'].filter(id => available.includes(id));
 
   const scores = {};
   const add = (id, pts) => { if (available.includes(id)) scores[id] = (scores[id] || 0) + pts; };
 
-  if (hasPdf || textLen > 4000) { add('gemini', 10); add('deepseekPro', 8); add('deepseek', 5); }
+  if (hasPdf || textLen > 4000) { add('gemini', 10); add('spaceBunny', 9); add('deepseekPro', 8); add('deepseek', 5); }
   if (codeScore >= 1 || hasCodeFile) {
+    add('spaceBunny', 16 + Math.min(codeScore, 5));
     add('deepseekPro', 15 + Math.min(codeScore, 5));
     add('deepseek', 12 + Math.min(codeScore, 3));
+    add('qwenCoder', 14 + Math.min(codeScore, 3));
     add('groq', 8);
     add('openrouter', 6);
   }
   if (!hasPdf && !hasCodeFile && codeScore === 0 && textLen > 0 && textLen < 200) {
     add('groq', 10);
+    add('groqQwen', 9);
     add('deepseek', 8);
     add('gemini', 5);
   }
@@ -789,7 +851,7 @@ function selectProviderChain(userText, attachments) {
   }
 
   const ranked = Object.entries(scores).sort((a, b) => b[1] - a[1]).map(([id]) => id);
-  const fallbackOrder = ['deepseek', 'deepseekPro', 'groq', 'openrouter', 'gemini'];
+  const fallbackOrder = ['spaceBunny', 'deepseek', 'deepseekPro', 'qwenCoder', 'groq', 'groqQwen', 'openrouter', 'openrouterAgent', 'gemini'];
   for (const id of fallbackOrder) if (available.includes(id) && !ranked.includes(id)) ranked.push(id);
   return ranked;
 }
@@ -1060,11 +1122,13 @@ function openSettings() {
   const modelSelect = document.getElementById('modelSelect');
   modelSelect.innerHTML = '<option value="">Auto (router decides)</option>';
   const modelsByProvider = {
-    deepseek:    ['deepseek-ai/deepseek-v4-flash'],
-    deepseekPro: ['deepseek-ai/deepseek-v4-pro'],
-    groq:        ['qwen/qwen3-32b', 'llama-3.3-70b-versatile', 'llama-3.1-8b-instant'],
-    openrouter:  ['qwen/qwen3-coder:free', 'nvidia/nemotron-3.5-lightning:free'],
-    gemini:      ['gemini-3.8-flash', 'gemini-2.5-flash-lite'],
+    spaceBunny: ['stealth/space-bunny-alpha'],
+    deepseek:   ['deepseek-ai/deepseek-v4-flash'],
+    deepseekPro:['deepseek-ai/deepseek-v4-pro'],
+    qwenCoder:  ['qwen/qwen3-coder-480b-a35b-instruct'],
+    groq:       ['moonshotai/kimi-k2-instruct', 'qwen/qwen3.6-27b'],
+    openrouter: ['nvidia/nemotron-3-ultra-550b-a55b:free', 'poolside/laguna-s-2.1:free'],
+    gemini:     ['gemini-3.8-flash', 'gemini-2.5-flash-lite'],
   };
   for (const [pid, models] of Object.entries(modelsByProvider)) {
     if (!keyIsValid(pid)) continue;
