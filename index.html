@@ -662,72 +662,18 @@ Rules:
 
 const PROXY_URL = "https://nobody-ai-proxy.shafick074.workers.dev";
 
-// ── UPDATED: Prioritizing reliable, fast coding models ──
+// ── ONLY TWO PROVIDERS: DeepSeek V4.1 Flash (NVIDIA) & Gemini 3.8 Flash ──
 const PROVIDERS = {
-  // 1. DeepSeek V4 Flash (NVIDIA) - Fast, reliable, 1M ctx
+  // 1. NVIDIA NIM: DeepSeek V4.1 Flash
   deepseek: {
-    name: 'DeepSeek V4 Flash (NVIDIA)',
+    name: 'DeepSeek V4.1 Flash (NVIDIA)',
     url: PROXY_URL + '?provider=deepseek',
-    model: 'deepseek-ai/deepseek-v4-flash',
-    supportsVision: true,
-    format: 'openai',
-    nativeReasoning: true,
-  },
-  // 2. Qwen3 Coder 480B (NVIDIA) - Dedicated coding model
-  qwenCoder: {
-    name: 'Qwen3 Coder 480B (NVIDIA)',
-    url: PROXY_URL + '?provider=qwenCoder',
-    model: 'qwen/qwen3-coder-480b-a35b-instruct',
-    supportsVision: false,
-    format: 'openai',
-    nativeReasoning: false,
-  },
-  // 3. Groq: Kimi K2 Instruct - Ultra-fast, great for coding
-  groq: {
-    name: 'Kimi K2 (Groq)',
-    url: PROXY_URL + '?provider=groq',
-    model: 'moonshotai/kimi-k2-instruct',
-    supportsVision: false,
-    format: 'openai',
-    nativeReasoning: false,
-  },
-  // 4. Groq: Qwen 3.6 27B - Fast reasoning
-  groqQwen: {
-    name: 'Qwen 3.6 27B (Groq)',
-    url: PROXY_URL + '?provider=groq',
-    model: 'qwen/qwen3.6-27b',
-    supportsVision: false,
-    format: 'openai',
-    nativeReasoning: false,
-  },
-  // 5. DeepSeek V4 Pro (NVIDIA) - Deep reasoning
-  deepseekPro: {
-    name: 'DeepSeek V4 Pro (NVIDIA)',
-    url: PROXY_URL + '?provider=deepseekPro',
-    model: 'deepseek-ai/deepseek-v4-pro',
+    model: 'deepseek-ai/deepseek-v4.1-flash',
     supportsVision: false,
     format: 'openai',
     nativeReasoning: true,
   },
-  // 6. OpenRouter: Nemotron 3 Ultra
-  openrouter: {
-    name: 'Nemotron 3 Ultra (OpenRouter)',
-    url: PROXY_URL + '?provider=openrouter',
-    model: 'nvidia/nemotron-3-ultra-550b-a55b:free',
-    supportsVision: false,
-    format: 'openai',
-    nativeReasoning: false,
-  },
-  // 7. OpenRouter: Laguna S 2.1
-  openrouterAgent: {
-    name: 'Laguna S 2.1 (OpenRouter)',
-    url: PROXY_URL + '?provider=openrouter',
-    model: 'poolside/laguna-s-2.1:free',
-    supportsVision: false,
-    format: 'openai',
-    nativeReasoning: false,
-  },
-  // 8. Gemini 3.8 Flash - Vision support
+  // 2. Google Gemini: Gemini 3.8 Flash
   gemini: {
     name: 'Gemini 3.8 Flash',
     url: PROXY_URL + '?provider=gemini',
@@ -735,28 +681,12 @@ const PROVIDERS = {
     supportsVision: true,
     format: 'gemini',
   },
-  // 9. Space Bunny Alpha - Moved to last resort due to unreliable performance
-  spaceBunny: {
-    name: 'Space Bunny Alpha (OpenRouter)',
-    url: PROXY_URL + '?provider=openrouter',
-    model: 'stealth/space-bunny-alpha',
-    supportsVision: true,
-    format: 'openai',
-    nativeReasoning: true,
-  },
 };
 
-const PROVIDER_TOKEN_BUDGETS = { 
-  groq: 6000, 
-  groqQwen: 6000,
-  gemini: 200000, 
-  deepseek: 1000000, 
-  deepseekPro: 1000000, 
-  qwenCoder: 256000,
-  spaceBunny: 1000000,
-  openrouter: 1000000,
-  openrouterAgent: 200000,
-  default: 12000 
+const PROVIDER_TOKEN_BUDGETS = {
+  gemini: 200000,
+  deepseek: 1000000,
+  default: 12000
 };
 
 function keyIsValid(id) { return !!PROVIDERS[id]; }
@@ -786,64 +716,20 @@ function isCodeFile(name) {
 }
 function detectCodeIntent(text) { const lower = (text || '').toLowerCase(); let score = 0; for (const kw of CODE_KEYWORDS) if (lower.includes(kw)) score += 1; return score; }
 
-// ── UPDATED: Reliable model routing ──
+// ── Simplified Router: DeepSeek for coding/text, Gemini for images/fallback ──
 function selectProviderChain(userText, attachments) {
   const available = Object.keys(PROVIDERS).filter(keyIsValid);
   if (!available.length) return [];
   
   const hasImage = attachments.some(a => a.type === 'image');
-  const hasPdf = attachments.some(a => a.type === 'pdf');
-  const hasCodeFile = attachments.some(a => a.type === 'text' && isCodeFile(a.name));
-  const textLen = (userText || '').length;
-  const codeScore = detectCodeIntent(userText);
-  const isCodingTask = codeScore >= 1 || hasCodeFile;
-
-  // ── RULE: Prioritize reliable coding models ──
-  if (isCodingTask) {
-    const codingChain = ['deepseek', 'qwenCoder', 'groq', 'groqQwen', 'deepseekPro', 'openrouter', 'openrouterAgent', 'spaceBunny'].filter(id => available.includes(id));
-    if (codingChain.length > 0) {
-      if (hasImage) {
-        return ['gemini', ...codingChain].filter((id, i, arr) => arr.indexOf(id) === i);
-      }
-      return codingChain;
-    }
+  
+  // If there's an image, try Gemini first (vision-capable), then DeepSeek
+  if (hasImage) {
+    return ['gemini', 'deepseek'].filter(id => available.includes(id));
   }
-
-  if (hasImage) return ['gemini', 'deepseek', 'spaceBunny'].filter(id => available.includes(id));
-
-  const scores = {};
-  const add = (id, pts) => { if (available.includes(id)) scores[id] = (scores[id] || 0) + pts; };
-
-  if (hasPdf || textLen > 4000) { add('gemini', 10); add('deepseek', 9); add('deepseekPro', 8); add('spaceBunny', 5); }
-  if (codeScore >= 1 || hasCodeFile) {
-    add('deepseek', 16 + Math.min(codeScore, 5));
-    add('qwenCoder', 15 + Math.min(codeScore, 5));
-    add('groq', 14 + Math.min(codeScore, 3));
-    add('groqQwen', 12 + Math.min(codeScore, 3));
-    add('deepseekPro', 12 + Math.min(codeScore, 3));
-    add('openrouter', 8);
-    add('spaceBunny', 5);
-  }
-  if (!hasPdf && !hasCodeFile && codeScore === 0 && textLen > 0 && textLen < 200) {
-    add('groq', 10);
-    add('groqQwen', 9);
-    add('deepseek', 8);
-    add('gemini', 5);
-  }
-  if (!hasPdf && !hasCodeFile && codeScore === 0 && textLen >= 200 && textLen <= 4000) {
-    add('deepseek', 8);
-    add('groq', 6);
-    add('deepseekPro', 5);
-    add('gemini', 4);
-  }
-  if (!Object.keys(scores).length) {
-    add('deepseek', 5); add('groq', 4); add('qwenCoder', 4); add('deepseekPro', 3); add('gemini', 2); add('spaceBunny', 1);
-  }
-
-  const ranked = Object.entries(scores).sort((a, b) => b[1] - a[1]).map(([id]) => id);
-  const fallbackOrder = ['deepseek', 'qwenCoder', 'groq', 'groqQwen', 'deepseekPro', 'openrouter', 'openrouterAgent', 'gemini', 'spaceBunny'];
-  for (const id of fallbackOrder) if (available.includes(id) && !ranked.includes(id)) ranked.push(id);
-  return ranked;
+  
+  // For everything else, try DeepSeek first (NVIDIA NIM), then Gemini as fallback
+  return ['deepseek', 'gemini'].filter(id => available.includes(id));
 }
 
 // ============================================================
@@ -1112,13 +998,8 @@ function openSettings() {
   const modelSelect = document.getElementById('modelSelect');
   modelSelect.innerHTML = '<option value="">Auto (router decides)</option>';
   const modelsByProvider = {
-    deepseek:   ['deepseek-ai/deepseek-v4-flash'],
-    qwenCoder:  ['qwen/qwen3-coder-480b-a35b-instruct'],
-    groq:       ['moonshotai/kimi-k2-instruct', 'qwen/qwen3.6-27b'],
-    deepseekPro:['deepseek-ai/deepseek-v4-pro'],
-    openrouter: ['nvidia/nemotron-3-ultra-550b-a55b:free', 'poolside/laguna-s-2.1:free'],
-    gemini:     ['gemini-3.8-flash', 'gemini-2.5-flash-lite'],
-    spaceBunny: ['stealth/space-bunny-alpha'],
+    deepseek: ['deepseek-ai/deepseek-v4.1-flash'],
+    gemini: ['gemini-3.8-flash', 'gemini-2.5-flash-lite'],
   };
   for (const [pid, models] of Object.entries(modelsByProvider)) {
     if (!keyIsValid(pid)) continue;
@@ -1573,7 +1454,6 @@ async function runGeneration({ p, userText, attachments, chain, combined }) {
       if (!result.text && !result.reasoningContent) throw new Error('Empty response');
       const elapsed = Math.round(performance.now() - t0);
       
-      // ── FIX: If model only generated thinking and no answer, show the thinking as the answer ──
       let { thinking, answer } = extractThinking(result.text || '', result.reasoningContent);
       let finalAnswer = answer || result.text || '';
       
