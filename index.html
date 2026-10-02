@@ -133,13 +133,14 @@
   .icon-toggle.on .icon-off{display:none}
   .voice-toggle.on .icon-on{display:block}
   .voice-toggle.on .icon-off{display:none}
-  .chat-container{flex:1;overflow-y:auto;padding:24px 20px 16px;display:flex;flex-direction:column;gap:20px;scroll-behavior:smooth;scrollbar-gutter:stable}
+  .chat-container{flex:1;overflow-y:auto;padding:24px 20px 16px;display:flex;flex-direction:column;gap:20px;scroll-behavior:smooth;scrollbar-gutter:stable;position:relative}
   .chat-container::-webkit-scrollbar{width:8px}
   .chat-container::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
   .message{display:flex;gap:11px;max-width:820px;animation:fadeIn .3s cubic-bezier(.2,.8,.2,1)}
   @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
   .message.ai{width:100%}
   .message.user{align-self:flex-end;flex-direction:row-reverse;max-width:85%}
+  .message.highlighted .bubble{box-shadow:0 0 0 3px rgba(99,102,241,.4),var(--shadow-md);transition:box-shadow .3s}
   .avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
   .avatar.ai{background:var(--primary-gradient);color:#fff;box-shadow:0 2px 10px rgba(99,102,241,.35)}
   .avatar.user{background:var(--bg-surface-2);color:var(--text-secondary);border:1px solid var(--border-light)}
@@ -158,6 +159,7 @@
   .thinking-brain{width:20px;height:20px;border-radius:50%;background:rgba(139,92,246,.15);color:#C4B5FD;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
   .thinking-title{font-size:12px;font-weight:600;color:#C4B5FD;flex:1;display:flex;align-items:center;gap:6px}
   .thinking-duration{font-size:10.5px;color:var(--text-muted);font-variant-numeric:tabular-nums}
+  .thinking-token-badge{font-size:9.5px;color:#C4B5FD;background:rgba(139,92,246,.15);padding:1px 5px;border-radius:4px;font-family:var(--font-mono)}
   .thinking-chevron{width:13px;height:13px;color:var(--text-muted);transition:transform .25s;flex-shrink:0}
   .thinking-panel.open .thinking-chevron{transform:rotate(180deg)}
   .thinking-body{display:none;padding:4px 13px 13px;border-top:1px solid var(--border-thinking);font-size:13px;line-height:1.7;color:var(--text-secondary);white-space:pre-wrap;word-wrap:break-word;max-height:400px;overflow-y:auto}
@@ -206,6 +208,7 @@
   .code-block{margin:12px 0;border-radius:8px;overflow:hidden;border:1px solid var(--code-border);background:var(--bg-code);max-width:100%}
   .code-header{display:flex;justify-content:space-between;align-items:center;padding:7px 11px 7px 13px;background:var(--bg-code-header);border-bottom:1px solid var(--code-border)}
   .code-lang{font-family:var(--font-mono);font-size:11.5px;color:var(--text-muted);text-transform:lowercase}
+  .code-lines{font-family:var(--font-mono);font-size:10px;color:var(--text-dark);margin-left:6px}
   .code-actions{display:flex;gap:3px;align-items:center}
   .copy-btn,.preview-btn{display:inline-flex;align-items:center;gap:5px;background:transparent;border:none;color:var(--text-muted);padding:4px 7px;border-radius:5px;font-size:12px;cursor:pointer;font-family:var(--font-sans)}
   .copy-btn:hover{background:rgba(127,127,127,.1);color:var(--text-main)}
@@ -250,9 +253,18 @@
   .icon-btn.stop{background:rgba(239,68,68,.85);color:#fff;display:none}
   .icon-btn.stop.visible{display:flex}
   .icon-btn.mic.recording{background:rgba(239,68,68,.2);color:#FCA5A5;border:1px solid rgba(239,68,68,.5)}
-  .input-hint{max-width:820px;margin:5px auto 0;font-size:10.5px;color:var(--text-dark);display:flex;justify-content:space-between}
+  .input-hint{max-width:820px;margin:5px auto 0;font-size:10.5px;color:var(--text-dark);display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .model-pill{font-size:10px;color:var(--primary-light);background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.2);padding:2px 7px;border-radius:10px;font-family:var(--font-mono);white-space:nowrap}
   .scroll-bottom{position:absolute;bottom:110px;right:26px;width:38px;height:38px;border-radius:50%;background:var(--bg-surface-2);border:1px solid var(--border-light);color:var(--text-main);cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:var(--shadow-lg);z-index:20}
   .scroll-bottom.visible{display:flex}
+  /* SEARCH OVERLAY */
+  .search-overlay{position:absolute;top:0;left:0;right:0;background:var(--bg-surface);border-bottom:1px solid var(--border);padding:10px 16px;display:none;align-items:center;gap:10px;z-index:30;box-shadow:var(--shadow-md)}
+  .search-overlay.active{display:flex}
+  .search-overlay input{flex:1;background:var(--bg-body);border:1px solid var(--border);color:var(--text-main);border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;outline:none}
+  .search-overlay input:focus{border-color:var(--primary)}
+  .search-count{font-size:11.5px;color:var(--text-muted);font-family:var(--font-mono);min-width:60px;text-align:right}
+  .search-nav-btn{background:transparent;border:1px solid var(--border);color:var(--text-muted);width:28px;height:28px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .search-nav-btn:hover{background:var(--bg-surface-hover);color:var(--text-main)}
   /* DEBUG */
   .debug-panel{margin-top:10px;padding:10px 12px;background:var(--bg-surface-2);border:1px solid var(--border);border-radius:8px;font-family:var(--font-mono);font-size:11px;line-height:1.6;color:var(--text-secondary)}
   .debug-panel .debug-title{color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-size:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
@@ -263,6 +275,13 @@
   .debug-panel .debug-row.err{color:#FCA5A5;border-left-color:rgba(239,68,68,.5)}
   .debug-panel .debug-row.info{color:#C4B5FD;border-left-color:rgba(139,92,246,.5)}
   .debug-panel .debug-label{color:var(--text-muted);display:inline-block;min-width:80px}
+  /* TOAST */
+  .toast-container{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:500;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+  .toast{background:var(--bg-surface-2);border:1px solid var(--border-light);color:var(--text-main);padding:10px 16px;border-radius:10px;font-size:13px;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:8px;animation:toastIn .25s cubic-bezier(.2,.8,.2,1);pointer-events:auto;max-width:90vw}
+  .toast.success{border-color:rgba(16,185,129,.5);color:var(--success-light)}
+  .toast.error{border-color:rgba(239,68,68,.5);color:#FCA5A5}
+  .toast.info{border-color:rgba(99,102,241,.5);color:var(--primary-light)}
+  @keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
   /* MODALS */
   .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:300;opacity:0;transition:opacity .25s;padding:20px}
   body[data-theme="light"] .modal-overlay{background:rgba(15,23,42,.5)}
@@ -318,6 +337,11 @@
   .palette-item:hover,.palette-item.selected{background:var(--bg-surface-hover)}
   .palette-item-icon{width:24px;height:24px;border-radius:6px;background:rgba(99,102,241,.15);color:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
   .palette-item-hint{margin-left:auto;font-size:11px;color:var(--text-dark);font-family:var(--font-mono)}
+  /* EMPTY STATE */
+  .empty-state .bubble{padding:20px 22px}
+  .suggested-prompts{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .suggested-prompt{background:var(--bg-surface-2);border:1px solid var(--border);color:var(--text-secondary);padding:8px 13px;border-radius:20px;font-size:12px;cursor:pointer;font-family:inherit;transition:all .15s;text-align:left}
+  .suggested-prompt:hover{background:var(--bg-surface-hover);border-color:var(--primary);color:var(--text-main);transform:translateY(-1px)}
   /* MOBILE */
   .sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:40;display:none;opacity:0;transition:opacity .25s}
   .sidebar-overlay.active{display:block;opacity:1}
@@ -352,6 +376,7 @@
     .signin-gate{padding:32px 16px}
     .signin-gate h2{font-size:22px}
     .signin-gate-icon{width:68px;height:68px;font-size:32px;border-radius:20px}
+    .search-overlay{padding:8px 10px}
   }
   @media(min-width:769px){.hamburger{display:none}.sidebar-overlay{display:none!important}}
 </style>
@@ -399,6 +424,9 @@
         <h1><span class="status-dot" id="statusDot"></span><span id="headerTitle">Nobody AI</span></h1>
       </div>
       <div class="header-right">
+        <button class="btn" onclick="openSearchOverlay()" title="Search messages (⌘F)" style="display:none" id="searchMsgBtn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
         <button class="icon-toggle" id="thinkingToggle" onclick="toggleThinking()" title="Deep thinking mode">
           <svg class="icon-off" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path></svg>
           <svg class="icon-on" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" fill="currentColor" fill-opacity="0.15"></circle></svg>
@@ -414,6 +442,14 @@
         </button>
         <button class="btn" onclick="clearCurrentChat()">Clear</button>
       </div>
+    </div>
+    <div class="search-overlay" id="searchOverlay">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <input type="text" id="searchOverlayInput" placeholder="Search in conversation…" oninput="performSearch(this.value)" onkeydown="handleSearchKeydown(event)">
+      <span class="search-count" id="searchCount">0/0</span>
+      <button class="search-nav-btn" onclick="navigateSearch(-1)" title="Previous (Shift+Enter)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"></polyline></svg></button>
+      <button class="search-nav-btn" onclick="navigateSearch(1)" title="Next (Enter)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
+      <button class="search-nav-btn" onclick="closeSearchOverlay()" title="Close (Esc)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
     </div>
     <div class="chat-container" id="chatContainer"></div>
     <button class="scroll-bottom" id="scrollBottom" onclick="scrollToBottom()">
@@ -437,11 +473,13 @@
           </button>
         </div>
       </div>
-      <div class="input-hint"><span id="charCount"></span><span id="providerHint"></span></div>
+      <div class="input-hint"><span id="charCount"></span><span class="model-pill" id="providerHint"></span></div>
       <input type="file" id="fileInput" style="display:none" accept="image/*,.txt,.md,.csv,.json,.py,.js,.ts,.jsx,.tsx,.html,.css,.xml,.yaml,.yml,.sql,.java,.c,.cpp,.h,.go,.rs,.rb,.php,.sh,.log,.ini,.conf,.pdf" multiple>
     </div>
   </div>
 </div>
+
+<div class="toast-container" id="toastContainer"></div>
 
 <!-- MODALS -->
 <div class="modal-overlay" id="confirmModal"><div class="modal modal-sm" tabindex="-1">
@@ -462,12 +500,10 @@
       <span id="authTitle">Sign in to Nobody AI</span>
     </h2>
     <p id="authSubtitle">Sync your projects across every device.</p>
-
     <div class="auth-tabs">
       <button type="button" class="auth-tab active" data-mode="signin" onclick="setAuthMode('signin')">Sign in</button>
       <button type="button" class="auth-tab" data-mode="signup" onclick="setAuthMode('signup')">Create account</button>
     </div>
-
     <div class="field-group" id="authNameGroup" style="display:none">
       <label class="field-label">Display name</label>
       <input type="text" class="input-field" id="authName" autocomplete="name" maxlength="60" placeholder="Your name">
@@ -480,9 +516,7 @@
       <label class="field-label">Password</label>
       <input type="password" class="input-field" id="authPassword" autocomplete="current-password" placeholder="At least 6 characters">
     </div>
-
     <div class="auth-error" id="authError"></div>
-
     <div class="modal-actions" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
       <button class="btn" id="authForgotBtn" onclick="handleForgotPassword()" type="button">Forgot password?</button>
       <div style="display:flex;gap:8px;margin-left:auto">
@@ -565,9 +599,7 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════════
-     FIREBASE MODULE — Email/Password auth + Firestore sync
-     ══════════════════════════════════════════════════════════════ -->
+<!-- FIREBASE MODULE -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {
@@ -624,9 +656,8 @@ window.dispatchEvent(new Event('fb-ready'));
 
 <script>
 // ══════════════════════════════════════════════════════════════
-//  🔒 API KEYS ARE NOW SECURELY STORED ON CLOUDFLARE WORKERS
+//  CONSTANTS
 // ══════════════════════════════════════════════════════════════
-
 const FREE_TRIAL_CREDITS = 0.05;
 const MAX_REQUESTS_PER_MINUTE = 8;
 const MAX_FILE_CHARS = 60000;
@@ -634,20 +665,25 @@ const MAX_INPUT_CHARS = 100000;
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
 const MAX_IMAGE_DIMENSION = 1600;
 const IMAGE_QUALITY = 0.85;
-const FETCH_TIMEOUT_MS = 60000;
-const PROJECTS_KEY_PREFIX = 'projects_v6_';
+const FETCH_TIMEOUT_MS = 90000;
+const PROJECTS_KEY_PREFIX = 'projects_v7_';
 const AUTOPLAY_KEY = 'autoplay_voice_v1';
 const VOICE_KEY = 'preferred_voice_v1';
 const THINKING_KEY = 'thinking_enabled_v1';
 const THEME_KEY = 'theme_v1';
 const SETTINGS_KEY = 'settings_v1';
+const USAGE_KEY = 'usage_stats_v1';
 const DEBUG_MODE = true;
 
 if (window.pdfjsLib) {
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 }
 
-// ── Professional Coding System Prompt ──
+// ── FIXED: THINKING_SYSTEM_PROMPT was undefined in the previous version ──
+const THINKING_SYSTEM_PROMPT = `When thinking through this problem, wrap your internal reasoning in <thinking>...</thinking> tags. 
+Your final answer should come AFTER the closing </thinking> tag. 
+Do not repeat your reasoning in the final answer.`;
+
 const CODING_SYSTEM_PROMPT = `You are Nobody AI, a senior-level software engineer and coding assistant. 
 Your goal is to write clean, production-ready code and provide expert-level technical guidance.
 
@@ -662,18 +698,19 @@ Rules:
 
 const PROXY_URL = "https://nobody-ai-proxy.shafick074.workers.dev";
 
-// ── PROVIDERS: Official DeepSeek API & Gemini 3.8 Flash ──
+// ── UPDATED: Best verified models as of Oct 2026 ──
+// DeepSeek: deepseek-flash (V4.1 Flash) is the canonical GA model, outperforms V4 Pro.
+// Gemini: gemini-3.8-flash is Google's most intelligent Flash model.
 const PROVIDERS = {
-  // 1. DeepSeek Official API
   deepseek: {
-    name: 'DeepSeek Official',
+    name: 'DeepSeek V4.1 Flash',
     url: PROXY_URL + '?provider=deepseek',
-    model: 'deepseek-chat', // Official model name (can also use 'deepseek-reasoner')
-    supportsVision: false,
+    model: 'deepseek-flash',
+    supportsVision: true,
     format: 'openai',
     nativeReasoning: true,
+    reasoningModel: 'deepseek-flash',
   },
-  // 2. Google Gemini: Gemini 3.8 Flash
   gemini: {
     name: 'Gemini 3.8 Flash',
     url: PROXY_URL + '?provider=gemini',
@@ -716,19 +753,11 @@ function isCodeFile(name) {
 }
 function detectCodeIntent(text) { const lower = (text || '').toLowerCase(); let score = 0; for (const kw of CODE_KEYWORDS) if (lower.includes(kw)) score += 1; return score; }
 
-// ── Simplified Router: DeepSeek Official for coding/text, Gemini for images/fallback ──
 function selectProviderChain(userText, attachments) {
   const available = Object.keys(PROVIDERS).filter(keyIsValid);
   if (!available.length) return [];
-  
   const hasImage = attachments.some(a => a.type === 'image');
-  
-  // If there's an image, try Gemini first (vision-capable), then DeepSeek
-  if (hasImage) {
-    return ['gemini', 'deepseek'].filter(id => available.includes(id));
-  }
-  
-  // For everything else, try DeepSeek first, then Gemini as fallback
+  if (hasImage) return ['gemini', 'deepseek'].filter(id => available.includes(id));
   return ['deepseek', 'gemini'].filter(id => available.includes(id));
 }
 
@@ -752,21 +781,24 @@ let pendingDraft = null;
 let editMessageIndex = null;
 let recognition = null;
 let isRecording = false;
-
 let currentUser = null;
 let cloudSaveTimer = null;
 let cloudSyncEnabled = false;
-
 let currentAuthMode = 'signin';
-
-let userSettings = { systemPrompt: '', model: '', temperature: 0.2, maxTokens: 4096 };
+let userSettings = { systemPrompt: '', model: '', temperature: 0.2, maxTokens: 8192 };
 let requestTimestamps = [];
+let usageStats = { totalInputTokens: 0, totalOutputTokens: 0, totalReasoningTokens: 0, totalRequests: 0 };
+
+// Search state
+let searchMatches = [];
+let currentSearchIndex = -1;
 
 try {
   const stored = localStorage.getItem(AUTOPLAY_KEY); if (stored !== null) autoPlayVoice = stored === 'true';
   const storedThink = localStorage.getItem(THINKING_KEY); if (storedThink !== null) thinkingEnabled = storedThink === 'true';
   const storedTheme = localStorage.getItem(THEME_KEY); if (storedTheme) document.body.dataset.theme = storedTheme;
   const storedSettings = localStorage.getItem(SETTINGS_KEY); if (storedSettings) Object.assign(userSettings, JSON.parse(storedSettings));
+  const storedUsage = localStorage.getItem(USAGE_KEY); if (storedUsage) Object.assign(usageStats, JSON.parse(storedUsage));
   const storedCredits = localStorage.getItem('credits_' + (localStorage.getItem('user_id') || 'default'));
   if (storedCredits !== null) { const n = parseFloat(storedCredits); if (!isNaN(n)) credits = n; }
 } catch {}
@@ -780,10 +812,11 @@ const USER_ID = (() => {
 function accountKey() { return (currentUser && currentUser.uid) || USER_ID; }
 function creditsStorageKey() { return 'credits_' + accountKey(); }
 function projectsStorageKey() { return PROJECTS_KEY_PREFIX + accountKey(); }
-
 let PROJECTS_KEY = PROJECTS_KEY_PREFIX + USER_ID;
 
-function saveCredits() { localStorage.setItem(creditsStorageKey(), String(credits)); }
+// ── FIXED: saveCredits was defined but never called ──
+function saveCredits() { try { localStorage.setItem(creditsStorageKey(), String(credits)); } catch {} }
+function saveUsage() { try { localStorage.setItem(USAGE_KEY, JSON.stringify(usageStats)); } catch {} }
 
 function buildSafeProjects(projects) {
   return projects.map(p => ({
@@ -797,7 +830,6 @@ function saveAll() {
   try {
     localStorage.setItem(PROJECTS_KEY, JSON.stringify({ projects: safe, activeProjectId }));
   } catch (e) {
-    console.warn('Local save failed, retrying with shrunk payload:', e);
     const shrunk = allProjects.map(p => ({
       ...p,
       display: (p.display || []).slice(-20),
@@ -806,6 +838,8 @@ function saveAll() {
     }));
     try { localStorage.setItem(PROJECTS_KEY, JSON.stringify({ projects: shrunk, activeProjectId })); } catch {}
   }
+  saveCredits();
+  saveUsage();
   scheduleCloudSave();
 }
 
@@ -817,7 +851,7 @@ function scheduleCloudSave() {
   if (!currentUser || !cloudSyncEnabled) return;
   clearTimeout(cloudSaveTimer);
   cloudSaveTimer = setTimeout(async () => {
-    try { await fb.pushState(currentUser.uid, { projects: allProjects.map(stripForCloud), activeProjectId, credits }); }
+    try { await fb.pushState(currentUser.uid, { projects: allProjects.map(stripForCloud), activeProjectId, credits, usageStats }); }
     catch (e) { console.warn('[fb] cloud push failed:', e); }
   }, 1200);
 }
@@ -844,6 +878,7 @@ async function loadFromCloud(uid) {
   allProjects = Array.isArray(state.projects) ? state.projects : [];
   activeProjectId = state.activeProjectId || null;
   credits = typeof state.credits === 'number' ? state.credits : FREE_TRIAL_CREDITS;
+  if (state.usageStats) usageStats = { ...usageStats, ...state.usageStats };
   allProjects.forEach(p => { if (!Array.isArray(p.pendingAttachments)) p.pendingAttachments = []; });
   allProjects = allProjects.filter(p => p && p.id && typeof p.name === 'string');
   if (!allProjects.length) activeProjectId = null;
@@ -854,6 +889,17 @@ async function loadFromCloud(uid) {
 }
 
 function getActiveProject() { return allProjects.find(p => p.id === activeProjectId); }
+
+// ── TOAST NOTIFICATIONS ──
+function showToast(message, type = 'info', duration = 3000) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast ' + type;
+  const icons = { success: '✓', error: '✕', info: 'ℹ' };
+  toast.innerHTML = `<span>${icons[type] || 'ℹ'}</span><span>${escapeHtml(message)}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(10px)'; toast.style.transition = 'all .25s'; setTimeout(() => toast.remove(), 250); }, duration);
+}
 
 // ============================================================
 //  AUTH GATE
@@ -893,6 +939,7 @@ function confirmNewProject() {
   allProjects.push(project);
   activeProjectId = project.id;
   saveAll(); closeNewProjectModal(); renderSidebar(); renderProject(); updateDownloadButton(); closeSidebar();
+  document.getElementById('searchMsgBtn').style.display = 'flex';
   setTimeout(() => { inputBox.focus(); if (pendingDraft) { const d = pendingDraft; pendingDraft = null; inputBox.value = d; updateCharCount(); sendMessage(); } }, 100);
 }
 function switchProject(id) {
@@ -900,8 +947,9 @@ function switchProject(id) {
   if (id === activeProjectId) { closeSidebar(); return; }
   if (isGenerating) return;
   const p = allProjects.find(x => x.id === id); if (!p) return;
-  stopSpeech(); activeProjectId = id;
+  stopSpeech(); activeProjectId = id; closeSearchOverlay();
   saveAll(); renderSidebar(); renderProject(); updateDownloadButton(); closeSidebar(); renderAttachmentPreviews();
+  document.getElementById('searchMsgBtn').style.display = 'flex';
   setTimeout(() => inputBox.focus(), 100);
 }
 function deleteProject(id) {
@@ -911,6 +959,7 @@ function deleteProject(id) {
     allProjects = allProjects.filter(x => x.id !== id);
     if (id === activeProjectId) { if (allProjects.length) { allProjects.sort((a,b)=>b.updatedAt-a.updatedAt); activeProjectId = allProjects[0].id; } else activeProjectId = null; renderProject(); }
     saveAll(); renderSidebar(); updateDownloadButton();
+    showToast('Project deleted', 'info');
   }});
 }
 function clearCurrentChat() {
@@ -919,6 +968,7 @@ function clearCurrentChat() {
   openConfirm({ title: 'Clear messages?', message: `All messages in "${p.name}" will be removed.`, okText: 'Clear', danger: true, onConfirm: () => {
     stopSpeech(); p.history = []; p.display = []; p.pendingAttachments = []; p.updatedAt = Date.now();
     saveAll(); renderProject(); renderSidebar(); updateDownloadButton(); renderAttachmentPreviews();
+    showToast('Conversation cleared', 'success');
   }});
 }
 
@@ -968,6 +1018,7 @@ function exportConversation(format) {
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 2000);
   closeExportModal();
+  showToast('Exported as ' + format.toUpperCase(), 'success');
 }
 function openImportModal() { if (!ensureSignedIn()) return; document.getElementById('importFile').value = ''; document.getElementById('importModal').classList.add('active'); }
 function closeImportModal() { document.getElementById('importModal').classList.remove('active'); }
@@ -985,6 +1036,8 @@ async function confirmImport() {
     }
     allProjects.push(project); activeProjectId = project.id;
     saveAll(); renderSidebar(); renderProject(); updateDownloadButton(); closeImportModal(); closeSidebar();
+    document.getElementById('searchMsgBtn').style.display = 'flex';
+    showToast('Conversation imported', 'success');
   } catch (err) { alert('Import failed: ' + err.message); }
 }
 
@@ -998,8 +1051,8 @@ function openSettings() {
   const modelSelect = document.getElementById('modelSelect');
   modelSelect.innerHTML = '<option value="">Auto (router decides)</option>';
   const modelsByProvider = {
-    deepseek: ['deepseek-chat', 'deepseek-reasoner'],
-    gemini: ['gemini-3.8-flash', 'gemini-2.5-flash-lite'],
+    deepseek: ['deepseek-flash'],
+    gemini: ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3.5-flash-lite'],
   };
   for (const [pid, models] of Object.entries(modelsByProvider)) {
     if (!keyIsValid(pid)) continue;
@@ -1012,10 +1065,11 @@ function closeSettings() { document.getElementById('settingsModal').classList.re
 function saveSettings() {
   userSettings.systemPrompt = document.getElementById('systemPromptInput').value;
   userSettings.temperature = parseFloat(document.getElementById('tempInput').value) || 0.2;
-  userSettings.maxTokens = parseInt(document.getElementById('maxTokensInput').value) || 4096;
+  userSettings.maxTokens = parseInt(document.getElementById('maxTokensInput').value) || 8192;
   userSettings.model = document.getElementById('modelSelect').value;
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(userSettings));
   closeSettings(); updateProviderHint();
+  showToast('Settings saved', 'success');
 }
 function closeTopup() { document.getElementById('topupModal').classList.remove('active'); }
 
@@ -1079,7 +1133,7 @@ function toggleTheme() {
   const link = document.getElementById('hljs-theme');
   if (link) link.href = next === 'light' ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css' : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css';
 }
-function toggleThinking() { thinkingEnabled = !thinkingEnabled; localStorage.setItem(THINKING_KEY, String(thinkingEnabled)); updateThinkingToggleUI(); }
+function toggleThinking() { thinkingEnabled = !thinkingEnabled; localStorage.setItem(THINKING_KEY, String(thinkingEnabled)); updateThinkingToggleUI(); showToast('Deep thinking ' + (thinkingEnabled ? 'enabled' : 'disabled'), 'info', 1800); }
 function updateThinkingToggleUI() { document.getElementById('thinkingToggle').classList.toggle('on', thinkingEnabled); }
 function toggleAutoVoice() { autoPlayVoice = !autoPlayVoice; localStorage.setItem(AUTOPLAY_KEY, String(autoPlayVoice)); updateVoiceToggleUI(); if (!autoPlayVoice) stopSpeech(); }
 function updateVoiceToggleUI() { document.getElementById('voiceToggle').classList.toggle('on', autoPlayVoice); }
@@ -1090,22 +1144,62 @@ function updateCreditsBadge() {
 }
 
 // ============================================================
+//  Search (IN-CONVERSATION)
+// ============================================================
+function openSearchOverlay() {
+  if (!getActiveProject()) return;
+  const overlay = document.getElementById('searchOverlay');
+  overlay.classList.add('active');
+  const inp = document.getElementById('searchOverlayInput');
+  inp.value = ''; inp.focus();
+  searchMatches = []; currentSearchIndex = -1;
+  document.getElementById('searchCount').textContent = '0/0';
+}
+function closeSearchOverlay() {
+  document.getElementById('searchOverlay').classList.remove('active');
+  document.querySelectorAll('.message.highlighted').forEach(m => m.classList.remove('highlighted'));
+  searchMatches = []; currentSearchIndex = -1;
+}
+function performSearch(query) {
+  document.querySelectorAll('.message.highlighted').forEach(m => m.classList.remove('highlighted'));
+  searchMatches = []; currentSearchIndex = -1;
+  if (!query || query.length < 2) { document.getElementById('searchCount').textContent = '0/0'; return; }
+  const q = query.toLowerCase();
+  const messages = Array.from(chatContainer.querySelectorAll('.message'));
+  messages.forEach(m => {
+    const text = (m.querySelector('.bubble')?.textContent || '').toLowerCase();
+    if (text.includes(q)) searchMatches.push(m);
+  });
+  if (searchMatches.length) { currentSearchIndex = 0; highlightCurrentMatch(); }
+  document.getElementById('searchCount').textContent = searchMatches.length ? `${currentSearchIndex + 1}/${searchMatches.length}` : '0/0';
+}
+function highlightCurrentMatch() {
+  document.querySelectorAll('.message.highlighted').forEach(m => m.classList.remove('highlighted'));
+  if (currentSearchIndex >= 0 && searchMatches[currentSearchIndex]) {
+    const m = searchMatches[currentSearchIndex];
+    m.classList.add('highlighted');
+    m.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+function navigateSearch(dir) {
+  if (!searchMatches.length) return;
+  currentSearchIndex = (currentSearchIndex + dir + searchMatches.length) % searchMatches.length;
+  highlightCurrentMatch();
+  document.getElementById('searchCount').textContent = `${currentSearchIndex + 1}/${searchMatches.length}`;
+}
+function handleSearchKeydown(e) {
+  if (e.key === 'Enter') { e.preventDefault(); navigateSearch(e.shiftKey ? -1 : 1); }
+  else if (e.key === 'Escape') { e.preventDefault(); closeSearchOverlay(); }
+}
+
+// ============================================================
 //  Streaming API calls
 // ============================================================
 async function streamOpenAI({ cfg, providerId, messages, model, onChunk, onReasoning, signal }) {
   const headers = { 'Content-Type': 'application/json' };
-  
-  const body = {
-    model,
-    messages,
-    temperature: userSettings.temperature,
-    max_tokens: userSettings.maxTokens,
-    stream: true,
-  };
-
-  if (cfg.nativeReasoning) {
-    body.chat_template_kwargs = { thinking: true };
-  }
+  const body = { model, messages, temperature: userSettings.temperature, max_tokens: userSettings.maxTokens, stream: true };
+  // DeepSeek V4.1 Flash: enable thinking via reasoning_effort
+  if (cfg.nativeReasoning && thinkingEnabled) body.reasoning_effort = 'high';
 
   const res = await fetch(cfg.url, { method: 'POST', headers, signal, body: JSON.stringify(body) });
   if (!res.ok) {
@@ -1114,11 +1208,9 @@ async function streamOpenAI({ cfg, providerId, messages, model, onChunk, onReaso
     const apiMsg = parsed?.error?.message || parsed?.message || errText.slice(0, 300);
     throw new Error(`${cfg.name} ${res.status}: ${apiMsg}`);
   }
-  
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
-  let buffer = '', inputTokens = 0, outputTokens = 0, fullText = '', fullReasoning = '';
-  
+  let buffer = '', inputTokens = 0, outputTokens = 0, reasoningTokens = 0, fullText = '', fullReasoning = '';
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
@@ -1134,11 +1226,15 @@ async function streamOpenAI({ cfg, providerId, messages, model, onChunk, onReaso
         if (delta.content) { fullText += delta.content; onChunk(delta.content); }
         const rDelta = delta.reasoning_content || delta.reasoning || delta.thinking || '';
         if (rDelta) { fullReasoning += rDelta; onReasoning(rDelta); }
-        if (parsed.usage) { inputTokens = parsed.usage.prompt_tokens || inputTokens; outputTokens = parsed.usage.completion_tokens || outputTokens; }
+        if (parsed.usage) {
+          inputTokens = parsed.usage.prompt_tokens || inputTokens;
+          outputTokens = parsed.usage.completion_tokens || outputTokens;
+          reasoningTokens = parsed.usage.completion_tokens_details?.reasoning_tokens || reasoningTokens;
+        }
       } catch {}
     }
   }
-  return { text: fullText, reasoningContent: fullReasoning, inputTokens, outputTokens, model };
+  return { text: fullText, reasoningContent: fullReasoning, inputTokens, outputTokens, reasoningTokens, model };
 }
 
 async function streamGemini({ cfg, contents, onChunk, onReasoning, signal }) {
@@ -1146,9 +1242,12 @@ async function streamGemini({ cfg, contents, onChunk, onReasoning, signal }) {
   const body = {
     model: cfg.model,
     contents,
-    generationConfig: { temperature: userSettings.temperature, maxOutputTokens: userSettings.maxTokens, thinkingConfig: { includeThoughts: true } },
+    generationConfig: {
+      temperature: userSettings.temperature,
+      maxOutputTokens: userSettings.maxTokens,
+      thinkingConfig: { includeThoughts: true, thinkingLevel: 'high' },
+    },
   };
-
   const res = await fetch(cfg.url, { method: 'POST', headers, signal, body: JSON.stringify(body) });
   if (!res.ok) {
     const errText = await res.text();
@@ -1156,11 +1255,9 @@ async function streamGemini({ cfg, contents, onChunk, onReasoning, signal }) {
     const apiMsg = parsed?.error?.message || errText.slice(0, 300);
     throw new Error(`Gemini ${res.status}: ${apiMsg}`);
   }
-
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
-  let buffer = '', inputTokens = 0, outputTokens = 0, fullText = '', fullReasoning = '';
-
+  let buffer = '', inputTokens = 0, outputTokens = 0, reasoningTokens = 0, fullText = '', fullReasoning = '';
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
@@ -1177,11 +1274,15 @@ async function streamGemini({ cfg, contents, onChunk, onReasoning, signal }) {
           if (p.thought === true && p.text) { fullReasoning += p.text; onReasoning(p.text); }
           else if (p.text) { fullText += p.text; onChunk(p.text); }
         }
-        if (parsed.usageMetadata) { inputTokens = parsed.usageMetadata.promptTokenCount || inputTokens; outputTokens = parsed.usageMetadata.candidatesTokenCount || outputTokens; }
+        if (parsed.usageMetadata) {
+          inputTokens = parsed.usageMetadata.promptTokenCount || inputTokens;
+          outputTokens = parsed.usageMetadata.candidatesTokenCount || outputTokens;
+          reasoningTokens = parsed.usageMetadata.thoughtsTokenCount || reasoningTokens;
+        }
       } catch {}
     }
   }
-  return { text: fullText, reasoningContent: fullReasoning, inputTokens, outputTokens, model: cfg.model };
+  return { text: fullText, reasoningContent: fullReasoning, inputTokens, outputTokens, reasoningTokens, model: cfg.model };
 }
 
 function withTimeout(promise, ms) {
@@ -1202,11 +1303,13 @@ function extractThinking(rawText, nativeReasoning) {
   if (m2 && !thinking) { thinking = m2[1].trim(); answer = answer.replace(re2, '').trim(); }
   return { thinking, answer: answer.replace(/^\s*\n+/, '') };
 }
-function renderThinkingPanel(thinking, dur, live) {
+function renderThinkingPanel(thinking, dur, live, tokenCount) {
   if (!thinking && !live) return '';
   const d = dur ? `${(dur/1000).toFixed(1)}s` : '';
+  const tokenBadge = tokenCount ? `<span class="thinking-token-badge">${tokenCount} tokens</span>` : '';
   const body = thinking ? escapeHtml(thinking).replace(/\n/g, '<br>') : '';
-  return `<div class="thinking-panel${live ? ' live' : ''}" onclick="toggleThinkingPanel(event)"><div class="thinking-header"><div class="thinking-brain">🧠</div><div class="thinking-title"><span>${live ? 'Thinking' : 'Thought process'}</span>${live ? '<span class="thinking-dots"><span></span><span></span><span></span></span>' : ''}</div><div class="thinking-duration">${live ? '' : escapeHtml(d)}</div><svg class="thinking-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg></div><div class="thinking-body">${body}</div></div>`;
+  const openClass = live ? ' open' : '';
+  return `<div class="thinking-panel${live ? ' live' : ''}${openClass}" onclick="toggleThinkingPanel(event)"><div class="thinking-header"><div class="thinking-brain">🧠</div><div class="thinking-title"><span>${live ? 'Thinking' : 'Thought process'}</span>${live ? '<span class="thinking-dots"><span></span><span></span><span></span></span>' : ''}${tokenBadge}</div><div class="thinking-duration">${live ? '' : escapeHtml(d)}</div><svg class="thinking-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg></div><div class="thinking-body">${body}</div></div>`;
 }
 function toggleThinkingPanel(ev) { const h = ev.target.closest('.thinking-header'); if (!h) return; h.closest('.thinking-panel').classList.toggle('open'); }
 
@@ -1254,16 +1357,13 @@ function compressImage(file) {
 // ============================================================
 //  Attachments
 // ============================================================
-function openFilePicker() {
-  if (!ensureSignedIn()) return;
-  document.getElementById('fileInput').click();
-}
+function openFilePicker() { if (!ensureSignedIn()) return; document.getElementById('fileInput').click(); }
 async function handleFiles(e) { await processFiles(Array.from(e.target.files)); e.target.value = ''; }
 async function processFiles(files) {
   if (!ensureSignedIn()) return;
   const p = getActiveProject(); if (!p) { openNewProjectModal(); return; }
   for (const file of files) {
-    if (file.size > MAX_FILE_BYTES) { alert(`"${file.name}" too large (max ${MAX_FILE_BYTES/1024/1024}MB).`); continue; }
+    if (file.size > MAX_FILE_BYTES) { showToast(`"${file.name}" too large (max 10MB).`, 'error'); continue; }
     const type = getFileType(file.name, file.type);
     let base64 = null, mimeType = file.type || 'application/octet-stream', previewUrl = null, extractedText = null;
     if (type === 'image') {
@@ -1333,9 +1433,9 @@ async function sendMessage() {
   const hasAtts = p.pendingAttachments.length > 0;
   if (!text && !hasAtts) return;
   if (isGenerating) return;
-  if (text.length > MAX_INPUT_CHARS) { alert('Message too long.'); return; }
+  if (text.length > MAX_INPUT_CHARS) { showToast('Message too long', 'error'); return; }
   if (credits <= 0) { document.getElementById('topupModal').classList.add('active'); return; }
-  if (!checkRateLimit()) { appendMessage('ai', '⚠️ Slow down — max ' + MAX_REQUESTS_PER_MINUTE + ' messages per minute.'); return; }
+  if (!checkRateLimit()) { showToast('Slow down — max ' + MAX_REQUESTS_PER_MINUTE + ' messages per minute', 'warning'); return; }
 
   stopSpeech();
 
@@ -1440,8 +1540,7 @@ async function runGeneration({ p, userText, attachments, chain, combined }) {
         for (const m of trimmed) messages.push(m);
         messages.push({ role: 'user', content: userContent });
 
-        let modelToUse = userSettings.model || cfg.model;
-        if (useNativeReasoning && !userSettings.model && cfg.reasoningModel) modelToUse = cfg.reasoningModel;
+        const modelToUse = userSettings.model || cfg.model;
 
         result = await withTimeout(streamOpenAI({
           cfg, providerId, messages, model: modelToUse,
@@ -1453,18 +1552,26 @@ async function runGeneration({ p, userText, attachments, chain, combined }) {
 
       if (!result.text && !result.reasoningContent) throw new Error('Empty response');
       const elapsed = Math.round(performance.now() - t0);
-      
+
+      // Update usage stats
+      usageStats.totalInputTokens += (result.inputTokens || 0);
+      usageStats.totalOutputTokens += (result.outputTokens || 0);
+      usageStats.totalReasoningTokens += (result.reasoningTokens || 0);
+      usageStats.totalRequests += 1;
+
       let { thinking, answer } = extractThinking(result.text || '', result.reasoningContent);
       let finalAnswer = answer || result.text || '';
-      
+
       if (!finalAnswer && thinking) {
         finalAnswer = "*[Note: The model only generated internal reasoning and no final answer. Showing reasoning:]*\n\n" + thinking;
-        thinking = ''; 
+        thinking = '';
       }
       if (!finalAnswer) finalAnswer = '(No answer)';
 
       let thinkingHTML = '';
-      if (thinkingEnabled && thinking) thinkingHTML = renderThinkingPanel(thinking, elapsed, false);
+      if (thinkingEnabled && (thinking || result.reasoningContent)) {
+        thinkingHTML = renderThinkingPanel(thinking || result.reasoningContent, elapsed, false, result.reasoningTokens || estimateTokens(result.reasoningContent));
+      }
 
       let footer = '';
       if (DEBUG_MODE) {
@@ -1472,7 +1579,7 @@ async function runGeneration({ p, userText, attachments, chain, combined }) {
           `<div class="debug-row ok"><span class="debug-label">Provider</span> ${escapeHtml(cfg.name)}</div>`,
           `<div class="debug-row ok"><span class="debug-label">Model</span> ${escapeHtml(result.model || cfg.model)}</div>`,
           `<div class="debug-row ok"><span class="debug-label">Latency</span> ${elapsed}ms</div>`,
-          `<div class="debug-row ok"><span class="debug-label">Tokens</span> in ${result.inputTokens} / out ${result.outputTokens}</div>`,
+          `<div class="debug-row ok"><span class="debug-label">Tokens</span> in ${result.inputTokens} / out ${result.outputTokens}${result.reasoningTokens ? ' (reasoning: ' + result.reasoningTokens + ')' : ''}</div>`,
         ];
         if (thinkingEnabled) rows.push(`<div class="debug-row info"><span class="debug-label">Thinking</span> ${thinking ? '✓ ' + thinking.length + ' chars' : '— none'}</div>`);
         if (attempts.length) rows.push(`<div class="debug-row warn"><span class="debug-label">Fallbacks</span> ${attempts.filter(a => !a.provider.endsWith('_retry')).map(a => a.provider).join(', ')}</div>`);
@@ -1482,9 +1589,11 @@ async function runGeneration({ p, userText, attachments, chain, combined }) {
       const finalHTML = thinkingHTML + renderMarkdown(finalAnswer) + footer;
       liveMsg.finalize(finalHTML);
 
+      // Store display with thinking info for re-rendering
+      const displayEntry = { role: 'ai', html: finalHTML };
       p.history.push({ role: 'user', content: combined || '[attachment]' });
       p.history.push({ role: 'assistant', content: result.text || finalAnswer });
-      p.display.push({ role: 'ai', html: finalHTML });
+      p.display.push(displayEntry);
       p.updatedAt = Date.now();
       saveAll(); renderSidebar(); updateDownloadButton();
 
@@ -1501,7 +1610,7 @@ async function runGeneration({ p, userText, attachments, chain, combined }) {
         if (partial) {
           const { thinking, answer } = extractThinking(partial, liveMsg.getReasoning());
           const finalAnswer = answer || partial;
-          const thinkingHTML = thinkingEnabled && thinking ? renderThinkingPanel(thinking, elapsed, false) : '';
+          const thinkingHTML = thinkingEnabled && thinking ? renderThinkingPanel(thinking, elapsed, false, estimateTokens(thinking)) : '';
           const stoppedNote = `<div style="font-size:11px;color:var(--text-dark);margin-top:8px;font-style:italic;">⏹ Stopped by user</div>`;
           const finalHTML = thinkingHTML + renderMarkdown(finalAnswer) + stoppedNote;
           liveMsg.finalize(finalHTML);
@@ -1520,6 +1629,7 @@ async function runGeneration({ p, userText, attachments, chain, combined }) {
       if (rateMatch && !alreadyRetried) {
         const waitSec = Math.min(parseFloat(rateMatch[1]) + 1, 15);
         liveMsg.remove();
+        showToast(`Rate limited — retrying in ${waitSec}s…`, 'warning', waitSec * 1000);
         await new Promise(r => setTimeout(r, waitSec * 1000));
         attempts.push({ provider: providerId + '_retry', message: 'rate-limit retry', elapsed: 0 });
         i--; continue;
@@ -1538,11 +1648,14 @@ async function runGeneration({ p, userText, attachments, chain, combined }) {
       debugHTML = renderDebugPanel('🔧 Debug — all providers failed', rows + hint);
     }
     appendMessage('ai', `⚠️ Something went wrong. Please try again in a moment.${debugHTML}`);
+    showToast('All providers failed', 'error');
   }
 
   isGenerating = false;
   currentAbortController = null;
   setGeneratingUI(false);
+  saveUsage();
+  updateCreditsBadge();
 }
 
 function setGeneratingUI(active) {
@@ -1646,37 +1759,58 @@ function confirmEditAndResend() {
   saveAll(); closeEditModal(); renderProject();
   inputBox.value = text; updateCharCount(); sendMessage();
 }
+
+// ── FIXED: deleteMessage now correctly removes history entries ──
 function deleteMessage(displayIndex) {
   if (!ensureSignedIn()) return;
   const p = getActiveProject(); if (!p) return;
   openConfirm({ title: 'Delete message?', message: 'This message and everything after it will be removed.', okText: 'Delete', danger: true, onConfirm: () => {
     const removed = p.display.slice(displayIndex);
     p.display = p.display.slice(0, displayIndex);
-    for (let i = 0; i < removed.length; i++) if (p.history.length > 0) p.history.pop();
+    let removeCount = 0;
+    for (const m of removed) removeCount += (m.role === 'user') ? 2 : 0;
+    if (removeCount > 0) p.history = p.history.slice(0, Math.max(0, p.history.length - removeCount));
     p.updatedAt = Date.now();
     saveAll(); renderProject(); renderSidebar(); updateDownloadButton();
+    showToast('Message deleted', 'success');
   }});
 }
+
+// ── FIXED: regenerateResponse now correctly identifies the target AI message ──
 function regenerateResponse(btn) {
   if (!ensureSignedIn()) return;
   if (isGenerating) return;
+  const p = getActiveProject(); if (!p) return;
   const wrapper = btn.closest('.message-content');
   const messageEl = wrapper?.closest('.message');
-  const p = getActiveProject();
-  if (!p || !messageEl) return;
+  if (!messageEl) return;
   const messages = Array.from(chatContainer.querySelectorAll('.message'));
   const idx = messages.indexOf(messageEl);
   if (idx < 0) return;
+  // Find the display index of this AI message
+  let displayIdx = -1;
+  let displayCount = 0;
+  for (let i = 0; i < p.display.length; i++) {
+    if (displayCount === idx) { displayIdx = i; break; }
+    displayCount++;
+  }
+  if (displayIdx < 0) { alert('Cannot locate message.'); return; }
+  // Find the preceding user message
   let userText = '';
-  for (let i = idx - 1; i >= 0; i--) {
-    if (p.display[i] && p.display[i].role === 'user') {
+  for (let i = displayIdx - 1; i >= 0; i--) {
+    if (p.display[i].role === 'user') {
       const temp = document.createElement('div'); temp.innerHTML = p.display[i].html;
       userText = temp.textContent.trim(); break;
     }
   }
   if (!userText) { alert('Cannot find original message.'); return; }
-  p.display = p.display.slice(0, idx);
-  if (p.history.length >= 2) p.history = p.history.slice(0, -2); else p.history = [];
+  // Trim display and history up to the user message
+  p.display = p.display.slice(0, displayIdx);
+  // Rebuild history by counting user/assistant pairs up to displayIdx
+  let keep = 0;
+  for (let i = 0; i < displayIdx; i++) keep += (p.display[i].role === 'user') ? 2 : 0;
+  p.history = p.history.slice(0, keep);
+  p.updatedAt = Date.now();
   saveAll(); renderProject(); updateDownloadButton();
   inputBox.value = userText; updateCharCount(); sendMessage();
 }
@@ -1687,7 +1821,7 @@ function regenerateResponse(btn) {
 function toggleVoiceInput() {
   if (!ensureSignedIn()) return;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { alert('Speech recognition not supported.'); return; }
+  if (!SR) { showToast('Speech recognition not supported', 'error'); return; }
   const btn = document.getElementById('micBtn');
   if (isRecording && recognition) { try { recognition.stop(); } catch {} return; }
   recognition = new SR();
@@ -1833,7 +1967,7 @@ function openProjectZipModal() {
   if (!ensureSignedIn()) return;
   const p = getActiveProject(); if (!p) return;
   const files = collectProjectFiles();
-  if (!files.length) { alert('No code blocks yet.'); return; }
+  if (!files.length) { showToast('No code blocks yet', 'info'); return; }
   currentZipFiles = files.map(f => ({ ...f }));
   openZipModalWithFiles(currentZipFiles, `from "${p.name}"`);
 }
@@ -1856,8 +1990,8 @@ async function downloadZip() {
   const names = new Set();
   for (const f of currentZipFiles) {
     const n = (f.name || '').trim();
-    if (!n) { alert('All files need names.'); return; }
-    if (names.has(n)) { alert('Duplicate: ' + n); return; }
+    if (!n) { showToast('All files need names', 'error'); return; }
+    if (names.has(n)) { showToast('Duplicate: ' + n, 'error'); return; }
     names.add(n); f.name = n;
   }
   const p = getActiveProject();
@@ -1874,7 +2008,8 @@ async function downloadZip() {
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 2000);
     closeZipModal();
-  } catch (err) { alert('ZIP failed: ' + err.message); }
+    showToast('ZIP downloaded', 'success');
+  } catch (err) { showToast('ZIP failed: ' + err.message, 'error'); }
   finally { btn.disabled = false; btn.innerHTML = orig; }
 }
 function downloadMessageZip(btn) {
@@ -1891,7 +2026,7 @@ function downloadMessageZip(btn) {
     } else if (node.nodeType === 1) buffer += ' ' + (node.textContent || '');
     else if (node.nodeType === 3) buffer += ' ' + (node.textContent || '');
   });
-  if (!files.length) { alert('No code.'); return; }
+  if (!files.length) { showToast('No code blocks in this message', 'info'); return; }
   currentZipFiles = files;
   openZipModalWithFiles(files, 'from this message');
 }
@@ -2031,9 +2166,10 @@ function renderCodeBlock(code, lang) {
     } catch {}
   }
   const langLabel = detectedLang || 'code';
+  const lineCount = decoded.split('\n').length;
   const showPv = canPreview(langLabel, decoded);
   const pv = showPv ? `<button class="preview-btn" onclick="previewCode(this)"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg><span>Preview</span></button>` : '';
-  return `<div class="code-block" data-lang="${escapeHtml(langLabel)}"><div class="code-header"><span class="code-lang">${escapeHtml(langLabel)}</span><div class="code-actions">${pv}<button class="copy-btn" onclick="copyCode(this)"><svg class="icon-copy" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg><svg class="icon-check" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg><span class="copy-label">Copy</span></button></div></div><div class="code-scroll"><pre><code class="hljs">${highlighted}</code></pre></div></div>`;
+  return `<div class="code-block" data-lang="${escapeHtml(langLabel)}"><div class="code-header"><span class="code-lang">${escapeHtml(langLabel)}<span class="code-lines">${lineCount} lines</span></span><div class="code-actions">${pv}<button class="copy-btn" onclick="copyCode(this)"><svg class="icon-copy" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg><svg class="icon-check" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg><span class="copy-label">Copy</span></button></div></div><div class="code-scroll"><pre><code class="hljs">${highlighted}</code></pre></div></div>`;
 }
 function copyCode(btn) {
   const block = btn.closest('.code-block'); if (!block) return;
@@ -2073,8 +2209,9 @@ function renderProject() {
   chatContainer.innerHTML = '';
   if (!currentUser) { headerTitle.textContent = 'Nobody AI'; renderSignInGate(); return; }
   const p = getActiveProject();
-  if (!p) { headerTitle.textContent = 'Nobody AI'; renderEmptyState(); return; }
+  if (!p) { headerTitle.textContent = 'Nobody AI'; renderEmptyState(); document.getElementById('searchMsgBtn').style.display = 'none'; return; }
   headerTitle.textContent = p.name || 'Untitled project';
+  document.getElementById('searchMsgBtn').style.display = 'flex';
   if (!p.display.length) { renderEmptyState(); return; }
   p.display.forEach((m, i) => {
     const div = document.createElement('div');
@@ -2086,7 +2223,6 @@ function renderProject() {
 }
 function renderEmptyState() {
   if (!currentUser) { renderSignInGate(); return; }
-
   const configured = Object.keys(PROVIDERS).filter(keyIsValid);
   let debug = '';
   if (DEBUG_MODE) {
@@ -2094,13 +2230,26 @@ function renderEmptyState() {
       const modelLabel = p.model;
       return `<div class="debug-row ok"><span class="debug-label">${escapeHtml(p.name)}</span> ✓ &nbsp; <span style="opacity:.7">${escapeHtml(modelLabel)}</span></div>`;
     }).join('');
-    debug = renderDebugPanel(`🔧 Debug — ${configured.length} providers ready (keys managed by backend)`, rows);
+    debug = renderDebugPanel(`🔧 Debug — ${configured.length} providers ready`, rows);
   }
-  const html = `<strong>Welcome to Nobody AI — Senior Coding Assistant.</strong><p style="margin-top:10px;">I'm tuned for software engineering: production-ready code, clean architecture, and expert debugging. Start a new project to begin.</p><p style="margin-top:10px;">What I can do:</p><ul style="margin-top:6px;"><li>Write production-ready code in 30+ languages</li><li>Debug complex stack traces and errors</li><li>Refactor legacy code into clean architecture</li><li>Preview HTML/CSS/JS/SVG live</li><li>Download your entire project as a ZIP</li><li>Explain algorithmic time/space complexity</li></ul>${debug}`;
+  const prompts = [
+    'Build a responsive landing page for a SaaS product',
+    'Debug this Python function and explain the error',
+    'Refactor this React component to use hooks',
+    'Write unit tests for this Express API endpoint',
+    'Explain the time complexity of this algorithm',
+  ];
+  const promptHTML = prompts.map(p => `<button class="suggested-prompt" onclick="useSuggestedPrompt('${escapeHtml(p).replace(/'/g, "\\'")}')">${escapeHtml(p)}</button>`).join('');
+  const html = `<strong>Welcome to Nobody AI — Senior Coding Assistant.</strong><p style="margin-top:10px;">I'm tuned for software engineering: production-ready code, clean architecture, and expert debugging. Start a new project to begin.</p><p style="margin-top:10px;">What I can do:</p><ul style="margin-top:6px;"><li>Write production-ready code in 30+ languages</li><li>Debug complex stack traces and errors</li><li>Refactor legacy code into clean architecture</li><li>Preview HTML/CSS/JS/SVG live</li><li>Download your entire project as a ZIP</li><li>Explain algorithmic time/space complexity</li></ul><div class="suggested-prompts">${promptHTML}</div>${debug}`;
   const div = document.createElement('div');
   div.className = 'message ai empty-state';
   div.innerHTML = `<div class="avatar ai">N</div><div class="message-content"><div class="bubble">${html}</div></div>`;
   chatContainer.appendChild(div);
+}
+function useSuggestedPrompt(text) {
+  inputBox.value = text; updateCharCount(); inputBox.focus();
+  inputBox.style.height = 'auto';
+  inputBox.style.height = Math.min(inputBox.scrollHeight, 220) + 'px';
 }
 
 function renderSignInGate() {
@@ -2141,12 +2290,13 @@ function updateCharCount() {
 }
 function updateProviderHint() {
   const el = document.getElementById('providerHint');
+  if (!el) return;
   if (!currentUser) { el.textContent = ''; return; }
   const configured = Object.keys(PROVIDERS).filter(keyIsValid);
-  if (!configured.length) { el.textContent = 'No providers configured'; return; }
+  if (!configured.length) { el.textContent = 'No providers'; return; }
   const p = getActiveProject();
   const atts = p ? p.pendingAttachments : [];
-  const chain = selectProviderChain(inputBox.value, atts);
+  const chain = selectProviderChain(inputBox ? inputBox.value : '', atts);
   if (chain.length) el.textContent = `→ ${PROVIDERS[chain[0]].name}`;
   else el.textContent = '';
 }
@@ -2166,6 +2316,10 @@ function htmlToPlainText(html) {
 function htmlToMarkdown(html) {
   const d = document.createElement('div'); d.innerHTML = html;
   d.querySelectorAll('.debug-panel, .message-actions').forEach(el => el.remove());
+  d.querySelectorAll('.thinking-panel').forEach(tp => {
+    const body = tp.querySelector('.thinking-body')?.textContent || '';
+    const w = document.createElement('div'); w.textContent = `\n> _Reasoning:_ ${body}\n`; tp.replaceWith(w);
+  });
   d.querySelectorAll('.code-block').forEach(cb => {
     const code = cb.querySelector('pre code')?.textContent || ''; const lang = cb.dataset.lang || '';
     const w = document.createElement('div'); w.textContent = `\n\`\`\`${lang}\n${code}\n\`\`\`\n`; cb.replaceWith(w);
@@ -2188,6 +2342,7 @@ const COMMANDS = [
   { id: 'toggle-theme', label: 'Toggle theme', run: () => toggleTheme() },
   { id: 'toggle-thinking', label: 'Toggle deep thinking', run: () => toggleThinking() },
   { id: 'toggle-voice', label: 'Toggle auto voice', run: () => toggleAutoVoice() },
+  { id: 'search-msgs', label: 'Search in conversation', hint: '⌘F', run: () => { closePalette(); openSearchOverlay(); } },
   { id: 'export-md', label: 'Export as Markdown', run: () => { closePalette(); exportConversation('md'); } },
   { id: 'export-json', label: 'Export as JSON', run: () => { closePalette(); exportConversation('json'); } },
   { id: 'import', label: 'Import conversation', run: () => openImportModal() },
@@ -2217,9 +2372,11 @@ document.addEventListener('keydown', (e) => {
   const mod = isMac ? e.metaKey : e.ctrlKey;
   if (mod && e.key.toLowerCase() === 'k') { e.preventDefault(); if (document.getElementById('paletteOverlay').classList.contains('active')) closePalette(); else openPalette(); return; }
   if (mod && e.key.toLowerCase() === 'n') { e.preventDefault(); openNewProjectModal(); return; }
+  if (mod && e.key.toLowerCase() === 'f') { e.preventDefault(); if (getActiveProject()) openSearchOverlay(); return; }
   if (mod && e.key === ',') { e.preventDefault(); openSettings(); return; }
   if (mod && e.key === 'Enter') { if (document.activeElement === inputBox) { e.preventDefault(); sendMessage(); } return; }
   if (e.key === 'Escape') {
+    if (document.getElementById('searchOverlay').classList.contains('active')) { closeSearchOverlay(); return; }
     ['previewModal','zipModal','newProjectModal','renameModal','exportModal','importModal','settingsModal','confirmModal','editModal','topupModal','paletteOverlay','authModal'].forEach(id => {
       const el = document.getElementById(id); if (el) el.classList.remove('active');
     });
@@ -2248,30 +2405,22 @@ function updateUserUI(user) {
   const st  = document.getElementById('userStatus');
   const btn = document.getElementById('userBtn');
   if (!av || !nm || !st || !btn) return;
-
   if (!user) {
-    av.textContent = '?';
-    nm.textContent = 'Not signed in';
-    st.textContent = 'Local only';
-    btn.textContent = 'Sign in';
-    btn.classList.add('signin');
+    av.textContent = '?'; nm.textContent = 'Not signed in'; st.textContent = 'Local only';
+    btn.textContent = 'Sign in'; btn.classList.add('signin');
   } else {
     const name = user.displayName || (user.email ? user.email.split('@')[0] : 'User');
-    nm.textContent = name;
-    st.textContent = user.email || 'Signed in';
+    nm.textContent = name; st.textContent = user.email || 'Signed in';
     av.textContent = (name[0] || '?').toUpperCase();
-    btn.textContent = 'Sign out';
-    btn.classList.remove('signin');
+    btn.textContent = 'Sign out'; btn.classList.remove('signin');
   }
   updateInputLockState();
 }
-
 async function handleAuthClick() {
   if (!window.fb) { alert('Firebase is still loading… try again in a moment.'); return; }
   if (currentUser) { await fb.signOutUser(); return; }
   openAuthModal('signin');
 }
-
 function openAuthModal(mode) {
   setAuthMode(mode || 'signin');
   document.getElementById('authEmail').value = '';
@@ -2302,27 +2451,19 @@ async function submitAuth() {
   const displayName = document.getElementById('authName').value.trim();
   const errEl = document.getElementById('authError');
   const btn = document.getElementById('authSubmitBtn');
-  errEl.classList.remove('success');
-  errEl.textContent = '';
-
+  errEl.classList.remove('success'); errEl.textContent = '';
   if (!email) { errEl.textContent = 'Please enter your email.'; return; }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { errEl.textContent = 'That email doesn\'t look valid.'; return; }
   if (!password || password.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
-
-  const orig = btn.textContent;
-  btn.disabled = true;
+  const orig = btn.textContent; btn.disabled = true;
   btn.textContent = mode === 'signup' ? 'Creating…' : 'Signing in…';
-
   try {
     if (mode === 'signup') await fb.signUpEmail(email, password, displayName);
     else await fb.signInEmail(email, password);
     closeAuthModal();
-  } catch (e) {
-    errEl.textContent = friendlyAuthError(e);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = orig;
-  }
+    showToast(mode === 'signup' ? 'Account created' : 'Signed in', 'success');
+  } catch (e) { errEl.textContent = friendlyAuthError(e); }
+  finally { btn.disabled = false; btn.textContent = orig; }
 }
 async function handleForgotPassword() {
   const email = document.getElementById('authEmail').value.trim();
@@ -2361,7 +2502,6 @@ async function bootstrapAfterFirebase() {
     PROJECTS_KEY = projectsStorageKey();
     const keyChanged = PROJECTS_KEY !== prevKey;
     updateUserUI(user);
-
     try {
       if (user) {
         const had = await loadFromCloud(user.uid);
@@ -2372,15 +2512,12 @@ async function bootstrapAfterFirebase() {
           scheduleCloudSave();
         }
       } else if (keyChanged) {
-        allProjects = [];
-        activeProjectId = null;
-        loadAll();
+        allProjects = []; activeProjectId = null; loadAll();
       }
     } catch (e) {
       console.warn('[fb] cloud error, falling back to local:', e);
       if (keyChanged) { allProjects = []; activeProjectId = null; loadAll(); }
     }
-
     renderSidebar();
     const p = getActiveProject();
     if (currentUser && p) { renderProject(); renderAttachmentPreviews(); }
@@ -2456,15 +2593,8 @@ function init() {
   else window.addEventListener('fb-ready', bootstrapAfterFirebase, { once: true });
 
   if (DEBUG_MODE) {
-    const configured = Object.keys(PROVIDERS).filter(keyIsValid);
-    console.log('[Nobody AI Debug] Providers configured:', configured.length ? configured : 'NONE');
-    console.log('[Nobody AI Debug] Models:',
-      Object.entries(PROVIDERS).map(([id, p]) => `${id}=${p.model}`).join(', '));
-    console.log('[Nobody AI Debug] Thinking:', thinkingEnabled ? 'ON' : 'OFF');
-    console.log('[Nobody AI Debug] Theme:', document.body.dataset.theme);
-    console.log('[Nobody AI Debug] JSZip loaded:', typeof JSZip !== 'undefined');
-    console.log('[Nobody AI Debug] Speech synthesis:', 'speechSynthesis' in window);
-    console.log('[Nobody AI Debug] Firebase:', window.fb ? 'ready' : 'loading…');
+    console.log('[Nobody AI] Providers:', Object.entries(PROVIDERS).map(([id, p]) => `${id}=${p.model}`).join(', '));
+    console.log('[Nobody AI] Usage stats:', usageStats);
   }
 }
 
