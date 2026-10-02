@@ -662,13 +662,13 @@ Rules:
 
 const PROXY_URL = "https://nobody-ai-proxy.shafick074.workers.dev";
 
-// ── NVIDIA NIM: Verified available models (Sept 2026) ──
+// ── NVIDIA NIM: Updated to verified model IDs (corrected 404 error) ──
 const PROVIDERS = {
   glm: {
-    name: 'GLM-5.3 (NVIDIA)',
+    name: 'GLM-5.3 Flash (NVIDIA)',
     url: PROXY_URL + '?provider=deepseek',
-    model: 'z-ai/glm-5-3',
-    supportsVision: false,
+    model: 'z-ai/glm-5.3-flash',
+    supportsVision: true,
     format: 'openai',
     nativeReasoning: true,
   },
@@ -703,7 +703,7 @@ const PROVIDERS = {
   },
 };
 
-const PROVIDER_TOKEN_BUDGETS = { groq: 6000, gemini: 200000, glm: 200000, devstral: 128000, openrouter: 20000, default: 12000 };
+const PROVIDER_TOKEN_BUDGETS = { groq: 6000, gemini: 200000, glm: 1000000, devstral: 262000, openrouter: 20000, default: 12000 };
 
 function keyIsValid(id) { return !!PROVIDERS[id]; }
 function estimateTokens(text) { if (!text) return 0; if (typeof text !== 'string') text = JSON.stringify(text); return Math.ceil(text.length / 4); }
@@ -748,7 +748,7 @@ function selectProviderChain(userText, attachments) {
   if (isCodingTask) {
     const nimCodingModels = ['glm', 'devstral'].filter(id => available.includes(id));
     if (nimCodingModels.length > 0) {
-      // If there's an image, we must use a vision-capable model (none in NIM list)
+      // If there's an image, we must use a vision-capable model
       if (hasImage) {
         return ['gemini', 'glm', 'devstral'].filter(id => nimCodingModels.includes(id) || id === 'gemini');
       }
@@ -1055,8 +1055,9 @@ function openSettings() {
   document.getElementById('maxTokensInput').value = userSettings.maxTokens;
   const modelSelect = document.getElementById('modelSelect');
   modelSelect.innerHTML = '<option value="">Auto (router decides)</option>';
+  // ── UPDATED: Corrected model IDs ──
   const modelsByProvider = {
-    glm:         ['z-ai/glm-5-3'],
+    glm:         ['z-ai/glm-5.3-flash'],
     devstral:    ['mistralai/devstral-2-123b-instruct-2512'],
     groq:        ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'],
     openrouter:  ['qwen/qwen3-coder:free', 'nvidia/nemotron-3.5-lightning:free'],
