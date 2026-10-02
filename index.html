@@ -662,19 +662,20 @@ Rules:
 
 const PROXY_URL = "https://nobody-ai-proxy.shafick074.workers.dev";
 
+// ── NVIDIA NIM: Updated models (DeepSeek V4 retired 2026-08-07) ──
 const PROVIDERS = {
-  deepseek: {
-    name: 'DeepSeek V4.1 Flash (NVIDIA)',
+  kimi: {
+    name: 'Kimi K2.6 (NVIDIA)',
     url: PROXY_URL + '?provider=deepseek',
-    model: 'deepseek-ai/deepseek-v4.1-flash',
+    model: 'moonshotai/kimi-k2.6',
     supportsVision: true,
     format: 'openai',
     nativeReasoning: true,
   },
-  deepseekPro: {
-    name: 'DeepSeek V4 Pro (NVIDIA)',
+  glm: {
+    name: 'GLM-5.2 (NVIDIA)',
     url: PROXY_URL + '?provider=deepseekPro',
-    model: 'deepseek-ai/deepseek-v4-pro',
+    model: 'z-ai/glm-5.2',
     supportsVision: false,
     format: 'openai',
     nativeReasoning: true,
@@ -702,7 +703,7 @@ const PROVIDERS = {
   },
 };
 
-const PROVIDER_TOKEN_BUDGETS = { groq: 6000, gemini: 200000, deepseek: 60000, deepseekPro: 120000, openrouter: 20000, default: 12000 };
+const PROVIDER_TOKEN_BUDGETS = { groq: 6000, gemini: 200000, kimi: 262000, glm: 1000000, openrouter: 20000, default: 12000 };
 
 function keyIsValid(id) { return !!PROVIDERS[id]; }
 function estimateTokens(text) { if (!text) return 0; if (typeof text !== 'string') text = JSON.stringify(text); return Math.ceil(text.length / 4); }
@@ -731,7 +732,7 @@ function isCodeFile(name) {
 }
 function detectCodeIntent(text) { const lower = (text || '').toLowerCase(); let score = 0; for (const kw of CODE_KEYWORDS) if (lower.includes(kw)) score += 1; return score; }
 
-// ── PROFESSIONAL ROUTER: DeepSeek exclusively for coding ──
+// ── PROFESSIONAL ROUTER: Kimi + GLM exclusively for coding ──
 function selectProviderChain(userText, attachments) {
   const available = Object.keys(PROVIDERS).filter(keyIsValid);
   if (!available.length) return [];
@@ -743,49 +744,49 @@ function selectProviderChain(userText, attachments) {
   const codeScore = detectCodeIntent(userText);
   const isCodingTask = codeScore >= 1 || hasCodeFile;
 
-  // ── RULE: ONLY DeepSeek for coding tasks ──
+  // ── RULE: ONLY Kimi + GLM for coding tasks ──
   if (isCodingTask) {
-    const deepseekAvailable = ['deepseekPro', 'deepseek'].filter(id => available.includes(id));
-    if (deepseekAvailable.length > 0) {
-      // If there's an image, we must use DeepSeek V4.1 Flash (deepseek) because Pro is text-only
+    const nimCodingModels = ['kimi', 'glm'].filter(id => available.includes(id));
+    if (nimCodingModels.length > 0) {
+      // If there's an image, we must use Kimi (GLM is text-only)
       if (hasImage) {
-        return ['deepseek', 'deepseekPro'].filter(id => deepseekAvailable.includes(id));
+        return ['kimi', 'glm'].filter(id => nimCodingModels.includes(id));
       }
-      // Otherwise, prioritize Pro for the highest quality code, then fallback to Flash
-      return deepseekAvailable;
+      // Otherwise, prioritize Kimi for the highest quality code, then fallback to GLM
+      return nimCodingModels;
     }
-    // If no DeepSeek key is configured, fall through to general logic (emergency fallback)
+    // If no NVIDIA NIM coding model is available, fall through to general logic
   }
 
-  if (hasImage) return ['gemini', 'deepseek', 'openrouter'].filter(id => available.includes(id));
+  if (hasImage) return ['gemini', 'kimi', 'openrouter'].filter(id => available.includes(id));
 
   const scores = {};
   const add = (id, pts) => { if (available.includes(id)) scores[id] = (scores[id] || 0) + pts; };
 
-  if (hasPdf || textLen > 4000) { add('gemini', 10); add('deepseekPro', 8); add('deepseek', 5); }
+  if (hasPdf || textLen > 4000) { add('gemini', 10); add('kimi', 8); add('glm', 5); }
   if (codeScore >= 1 || hasCodeFile) {
-    add('deepseekPro', 15 + Math.min(codeScore, 5));
-    add('deepseek', 12 + Math.min(codeScore, 3));
+    add('kimi', 15 + Math.min(codeScore, 5));
+    add('glm', 12 + Math.min(codeScore, 3));
     add('groq', 8);
     add('openrouter', 6);
   }
   if (!hasPdf && !hasCodeFile && codeScore === 0 && textLen > 0 && textLen < 200) {
     add('groq', 10);
-    add('deepseek', 8);
+    add('kimi', 8);
     add('gemini', 5);
   }
   if (!hasPdf && !hasCodeFile && codeScore === 0 && textLen >= 200 && textLen <= 4000) {
-    add('deepseek', 8);
+    add('kimi', 8);
     add('groq', 6);
-    add('deepseekPro', 5);
+    add('glm', 5);
     add('gemini', 4);
   }
   if (!Object.keys(scores).length) {
-    add('deepseek', 5); add('groq', 4); add('deepseekPro', 3); add('gemini', 2); add('openrouter', 1);
+    add('kimi', 5); add('groq', 4); add('glm', 3); add('gemini', 2); add('openrouter', 1);
   }
 
   const ranked = Object.entries(scores).sort((a, b) => b[1] - a[1]).map(([id]) => id);
-  const fallbackOrder = ['deepseekPro', 'deepseek', 'groq', 'openrouter', 'gemini'];
+  const fallbackOrder = ['kimi', 'glm', 'groq', 'openrouter', 'gemini'];
   for (const id of fallbackOrder) if (available.includes(id) && !ranked.includes(id)) ranked.push(id);
   return ranked;
 }
@@ -1056,8 +1057,8 @@ function openSettings() {
   const modelSelect = document.getElementById('modelSelect');
   modelSelect.innerHTML = '<option value="">Auto (router decides)</option>';
   const modelsByProvider = {
-    deepseek:    ['deepseek-ai/deepseek-v4.1-flash'],
-    deepseekPro: ['deepseek-ai/deepseek-v4-pro'],
+    kimi:        ['moonshotai/kimi-k2.6'],
+    glm:         ['z-ai/glm-5.2'],
     groq:        ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'],
     openrouter:  ['qwen/qwen3-coder:free', 'nvidia/nemotron-3.5-lightning:free'],
     gemini:      ['gemini-3.6-flash', 'gemini-2.5-flash-lite'],
@@ -1164,12 +1165,9 @@ async function streamOpenAI({ cfg, providerId, messages, model, onChunk, onReaso
     stream: true,
   };
 
-  if (cfg.nvidiaNim) {
-    if (model.includes('deepseek-v4-pro')) {
-      body.reasoning_effort = 'high';
-    } else if (model.includes('deepseek-v4.1-flash')) {
-      body.chat_template_kwargs = { thinking: true };
-    }
+  // NVIDIA NIM: enable native reasoning if supported
+  if (cfg.nativeReasoning) {
+    body.chat_template_kwargs = { thinking: true };
   }
 
   const res = await fetch(cfg.url, { method: 'POST', headers, signal, body: JSON.stringify(body) });
