@@ -662,13 +662,13 @@ Rules:
 
 const PROXY_URL = "https://nobody-ai-proxy.shafick074.workers.dev";
 
-// ── ONLY TWO PROVIDERS: DeepSeek V4.1 Flash (NVIDIA) & Gemini 3.8 Flash ──
+// ── PROVIDERS: Official DeepSeek API & Gemini 3.8 Flash ──
 const PROVIDERS = {
-  // 1. NVIDIA NIM: DeepSeek V4.1 Flash
+  // 1. DeepSeek Official API
   deepseek: {
-    name: 'DeepSeek V4.1 Flash (NVIDIA)',
+    name: 'DeepSeek Official',
     url: PROXY_URL + '?provider=deepseek',
-    model: 'deepseek-ai/deepseek-v4.1-flash',
+    model: 'deepseek-chat', // Official model name (can also use 'deepseek-reasoner')
     supportsVision: false,
     format: 'openai',
     nativeReasoning: true,
@@ -716,7 +716,7 @@ function isCodeFile(name) {
 }
 function detectCodeIntent(text) { const lower = (text || '').toLowerCase(); let score = 0; for (const kw of CODE_KEYWORDS) if (lower.includes(kw)) score += 1; return score; }
 
-// ── Simplified Router: DeepSeek for coding/text, Gemini for images/fallback ──
+// ── Simplified Router: DeepSeek Official for coding/text, Gemini for images/fallback ──
 function selectProviderChain(userText, attachments) {
   const available = Object.keys(PROVIDERS).filter(keyIsValid);
   if (!available.length) return [];
@@ -728,7 +728,7 @@ function selectProviderChain(userText, attachments) {
     return ['gemini', 'deepseek'].filter(id => available.includes(id));
   }
   
-  // For everything else, try DeepSeek first (NVIDIA NIM), then Gemini as fallback
+  // For everything else, try DeepSeek first, then Gemini as fallback
   return ['deepseek', 'gemini'].filter(id => available.includes(id));
 }
 
@@ -998,7 +998,7 @@ function openSettings() {
   const modelSelect = document.getElementById('modelSelect');
   modelSelect.innerHTML = '<option value="">Auto (router decides)</option>';
   const modelsByProvider = {
-    deepseek: ['deepseek-ai/deepseek-v4.1-flash'],
+    deepseek: ['deepseek-chat', 'deepseek-reasoner'],
     gemini: ['gemini-3.8-flash', 'gemini-2.5-flash-lite'],
   };
   for (const [pid, models] of Object.entries(modelsByProvider)) {
