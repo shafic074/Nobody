@@ -662,23 +662,23 @@ Rules:
 
 const PROXY_URL = "https://nobody-ai-proxy.shafick074.workers.dev";
 
-// ── NVIDIA NIM: Updated models (DeepSeek V4 retired 2026-08-07) ──
+// ── NVIDIA NIM: Verified available models (Sept 2026) ──
 const PROVIDERS = {
-  kimi: {
-    name: 'Kimi K2.6 (NVIDIA)',
-    url: PROXY_URL + '?provider=deepseek',
-    model: 'moonshotai/kimi-k2.6',
-    supportsVision: true,
-    format: 'openai',
-    nativeReasoning: true,
-  },
   glm: {
-    name: 'GLM-5.2 (NVIDIA)',
-    url: PROXY_URL + '?provider=deepseekPro',
-    model: 'z-ai/glm-5.2',
+    name: 'GLM-5.3 (NVIDIA)',
+    url: PROXY_URL + '?provider=deepseek',
+    model: 'z-ai/glm-5-3',
     supportsVision: false,
     format: 'openai',
     nativeReasoning: true,
+  },
+  devstral: {
+    name: 'Devstral-2-123B (NVIDIA)',
+    url: PROXY_URL + '?provider=deepseekPro',
+    model: 'mistralai/devstral-2-123b-instruct-2512',
+    supportsVision: false,
+    format: 'openai',
+    nativeReasoning: false,
   },
   groq: {
     name: 'Groq',
@@ -703,7 +703,7 @@ const PROVIDERS = {
   },
 };
 
-const PROVIDER_TOKEN_BUDGETS = { groq: 6000, gemini: 200000, kimi: 262000, glm: 1000000, openrouter: 20000, default: 12000 };
+const PROVIDER_TOKEN_BUDGETS = { groq: 6000, gemini: 200000, glm: 200000, devstral: 128000, openrouter: 20000, default: 12000 };
 
 function keyIsValid(id) { return !!PROVIDERS[id]; }
 function estimateTokens(text) { if (!text) return 0; if (typeof text !== 'string') text = JSON.stringify(text); return Math.ceil(text.length / 4); }
@@ -732,7 +732,7 @@ function isCodeFile(name) {
 }
 function detectCodeIntent(text) { const lower = (text || '').toLowerCase(); let score = 0; for (const kw of CODE_KEYWORDS) if (lower.includes(kw)) score += 1; return score; }
 
-// ── PROFESSIONAL ROUTER: Kimi + GLM exclusively for coding ──
+// ── PROFESSIONAL ROUTER: GLM + Devstral exclusively for coding ──
 function selectProviderChain(userText, attachments) {
   const available = Object.keys(PROVIDERS).filter(keyIsValid);
   if (!available.length) return [];
@@ -744,49 +744,48 @@ function selectProviderChain(userText, attachments) {
   const codeScore = detectCodeIntent(userText);
   const isCodingTask = codeScore >= 1 || hasCodeFile;
 
-  // ── RULE: ONLY Kimi + GLM for coding tasks ──
+  // ── RULE: ONLY GLM + Devstral for coding tasks ──
   if (isCodingTask) {
-    const nimCodingModels = ['kimi', 'glm'].filter(id => available.includes(id));
+    const nimCodingModels = ['glm', 'devstral'].filter(id => available.includes(id));
     if (nimCodingModels.length > 0) {
-      // If there's an image, we must use Kimi (GLM is text-only)
+      // If there's an image, we must use a vision-capable model (none in NIM list)
       if (hasImage) {
-        return ['kimi', 'glm'].filter(id => nimCodingModels.includes(id));
+        return ['gemini', 'glm', 'devstral'].filter(id => nimCodingModels.includes(id) || id === 'gemini');
       }
-      // Otherwise, prioritize Kimi for the highest quality code, then fallback to GLM
+      // Otherwise, prioritize GLM-5.3 for highest quality, then Devstral
       return nimCodingModels;
     }
-    // If no NVIDIA NIM coding model is available, fall through to general logic
   }
 
-  if (hasImage) return ['gemini', 'kimi', 'openrouter'].filter(id => available.includes(id));
+  if (hasImage) return ['gemini', 'glm', 'openrouter'].filter(id => available.includes(id));
 
   const scores = {};
   const add = (id, pts) => { if (available.includes(id)) scores[id] = (scores[id] || 0) + pts; };
 
-  if (hasPdf || textLen > 4000) { add('gemini', 10); add('kimi', 8); add('glm', 5); }
+  if (hasPdf || textLen > 4000) { add('gemini', 10); add('glm', 8); add('devstral', 5); }
   if (codeScore >= 1 || hasCodeFile) {
-    add('kimi', 15 + Math.min(codeScore, 5));
-    add('glm', 12 + Math.min(codeScore, 3));
+    add('glm', 15 + Math.min(codeScore, 5));
+    add('devstral', 12 + Math.min(codeScore, 3));
     add('groq', 8);
     add('openrouter', 6);
   }
   if (!hasPdf && !hasCodeFile && codeScore === 0 && textLen > 0 && textLen < 200) {
     add('groq', 10);
-    add('kimi', 8);
+    add('glm', 8);
     add('gemini', 5);
   }
   if (!hasPdf && !hasCodeFile && codeScore === 0 && textLen >= 200 && textLen <= 4000) {
-    add('kimi', 8);
+    add('glm', 8);
     add('groq', 6);
-    add('glm', 5);
+    add('devstral', 5);
     add('gemini', 4);
   }
   if (!Object.keys(scores).length) {
-    add('kimi', 5); add('groq', 4); add('glm', 3); add('gemini', 2); add('openrouter', 1);
+    add('glm', 5); add('groq', 4); add('devstral', 3); add('gemini', 2); add('openrouter', 1);
   }
 
   const ranked = Object.entries(scores).sort((a, b) => b[1] - a[1]).map(([id]) => id);
-  const fallbackOrder = ['kimi', 'glm', 'groq', 'openrouter', 'gemini'];
+  const fallbackOrder = ['glm', 'devstral', 'groq', 'openrouter', 'gemini'];
   for (const id of fallbackOrder) if (available.includes(id) && !ranked.includes(id)) ranked.push(id);
   return ranked;
 }
@@ -1057,8 +1056,8 @@ function openSettings() {
   const modelSelect = document.getElementById('modelSelect');
   modelSelect.innerHTML = '<option value="">Auto (router decides)</option>';
   const modelsByProvider = {
-    kimi:        ['moonshotai/kimi-k2.6'],
-    glm:         ['z-ai/glm-5.2'],
+    glm:         ['z-ai/glm-5-3'],
+    devstral:    ['mistralai/devstral-2-123b-instruct-2512'],
     groq:        ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'],
     openrouter:  ['qwen/qwen3-coder:free', 'nvidia/nemotron-3.5-lightning:free'],
     gemini:      ['gemini-3.6-flash', 'gemini-2.5-flash-lite'],
